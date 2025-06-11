@@ -40,3 +40,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+/small_file.txt
+/test_data.txt
+/large_file.txt
+/copied_file.txt
