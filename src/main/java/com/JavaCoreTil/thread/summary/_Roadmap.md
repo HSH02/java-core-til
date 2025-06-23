@@ -8,7 +8,7 @@
 └─ 메모리 구조 : Thread Stack(지역변수), Heap(공유 객체)
 
 ---
-🟡 2단계: Thread 생성과 제어
+✅ 2단계: Thread 생성과 제어 (완료)
 ├─ Thread 생성 방법 : 상속, Runnable, 람다, 익명 클래스
 ├─ 주요 제어 메서드 : start(), join(), sleep(), interrupt()
 ├─ Thread 속성 관리 : 이름, 우선순위, 데몬 스레드
@@ -16,7 +16,7 @@
 └─ 안전한 종료 : interrupt 활용, 리소스 정리
 
 ---
-🟠 3단계: 메모리 가시성 (Memory Visibility)
+✅ 3단계: 메모리 가시성 (Memory Visibility) (완료)
 ├─ 메모리 가시성 문제 : CPU 캐시, 메모리 일관성
 ├─ volatile 키워드 : 가시성 보장, 재정렬 방지
 ├─ 자바 메모리 모델(JMM) : happens-before 관계

@@ -1,34 +1,27 @@
 package com.JavaCoreTil.thread.task;
 
 /**
- * 실습 4: synchronized로 Race Condition 해결하기
- * 
- * 학습 목표:
- * - Task03의 Race Condition 문제를 synchronized로 해결
- * - synchronized 메서드 vs 블록 비교  
- * - 성능 차이 체감
+ * Task04: synchronized로 동시성 문제 해결
  */
 public class Task04_SynchronizedPractice {
     
     private static int counter = 0;
     
     public static void main(String[] args) throws InterruptedException {
-        System.out.println("=== Task04: synchronized 실습 ===");
+        System.out.println("=== synchronized 실습 ===");
         
-        // TODO 1: 문제 상황 재현
-        System.out.println("\n1단계: Race Condition 재현");
+        // Race Condition 재현
+        System.out.println("\n1. Race Condition 재현");
         testUnsafe();
         
-        // TODO 2: synchronized 메서드로 해결
-        System.out.println("\n2단계: synchronized 메서드 해결");
+        // synchronized 메서드로 해결
+        System.out.println("\n2. synchronized 메서드");
         testSafe();
         
-        // TODO 3: synchronized 블록으로 최적화
-        System.out.println("\n3단계: synchronized 블록 최적화");
+        // synchronized 블록으로 최적화
+        System.out.println("\n3. synchronized 블록");
         testOptimized();
     }
-    
-    // TODO 4: 이 메서드들을 완성하세요
     
     private static void testUnsafe() throws InterruptedException {
         counter = 0;
@@ -80,7 +73,7 @@ public class Task04_SynchronizedPractice {
     
     private static void unsafeIncrement() {
         for (int i = 0; i < 1000; i++) {
-            counter++; // Race Condition 발생 가능
+            counter++; // Race Condition 발생
         }
     }
     
@@ -93,7 +86,7 @@ public class Task04_SynchronizedPractice {
     private static void optimizedIncrement() {
         for (int i = 0; i < 1000; i++) {
             synchronized (Task04_SynchronizedPractice.class) {
-                counter++; // synchronized 블록으로 최소한만 보호
+                counter++; // synchronized 블록으로 최소 보호
             }
         }
     }

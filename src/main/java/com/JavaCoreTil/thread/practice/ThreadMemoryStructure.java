@@ -3,6 +3,9 @@ package com.JavaCoreTil.thread.practice;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Thread 메모리 구조 데모
+ */
 public class ThreadMemoryStructure {
     
     // Heap 영역 - 모든 스레드가 공유
@@ -12,14 +15,12 @@ public class ThreadMemoryStructure {
     
     public static void main(String[] args) throws InterruptedException {
         demonstrateMemoryStructure();
-
         visualizeMemoryStructure();
     }
     
     public static void demonstrateMemoryStructure() throws InterruptedException {
         System.out.println("=== Thread 메모리 구조 ===");
         
-        // 여러 스레드가 메모리를 어떻게 사용하는지 관찰
         Thread thread1 = new Thread(() -> accessMemory("Thread-1"));
         Thread thread2 = new Thread(() -> accessMemory("Thread-2"));
         
@@ -29,27 +30,27 @@ public class ThreadMemoryStructure {
         thread1.join();
         thread2.join();
         
-        System.out.println("최종 공유 상태:");
-        System.out.println("- sharedCounter: " + sharedCounter);
-        System.out.println("- sharedList: " + sharedList);
+        System.out.println("\n최종 공유 상태:");
+        System.out.println("sharedCounter: " + sharedCounter);
+        System.out.println("sharedList: " + sharedList);
     }
     
     private static void accessMemory(String threadName) {
         // Thread Stack 영역 - 각 스레드마다 독립적
-        int localVariable = 0;           // 스택에 저장
-        String localString = "로컬";     // 스택에 저장 (참조)
-        Object localObject = new Object(); // 객체는 Heap, 참조는 Stack
+        int localVariable = 0;
+        String localString = "로컬";
+        Object localObject = new Object();
         
-        System.out.println("\n=== " + threadName + " 메모리 접근 ===");
+        System.out.println("\n" + threadName + " 메모리 접근:");
         
         for (int i = 0; i < 3; i++) {
-            // 로컬 변수 수정 (각 스레드 독립적)
+            // 로컬 변수 - 각 스레드 독립적
             localVariable++;
-            System.out.println(threadName + " 로컬 변수: " + localVariable);
+            System.out.println("  로컬 변수: " + localVariable);
             
-            // 공유 변수 수정 (모든 스레드 공유, 동시성 문제 발생 가능)
+            // 공유 변수 - 모든 스레드 공유
             sharedCounter++;
-            System.out.println(threadName + " 공유 카운터: " + sharedCounter);
+            System.out.println("  공유 카운터: " + sharedCounter);
             
             // 공유 컬렉션 수정
             sharedList.add(threadName + "-" + i);
@@ -62,11 +63,10 @@ public class ThreadMemoryStructure {
             }
         }
         
-        // 메모리 영역 정리
-        System.out.println(threadName + " 메모리 정리:");
-        System.out.println("- 로컬 변수 최종값: " + localVariable);
-        System.out.println("- 로컬 객체 해시: " + localObject.hashCode());
-        System.out.println("- 스택 정보: 이 스레드 종료 시 자동 해제");
+        System.out.println(threadName + " 정리:");
+        System.out.println("  로컬 변수 최종값: " + localVariable);
+        System.out.println("  로컬 객체 해시: " + localObject.hashCode());
+        System.out.println("  // 스택 정보는 스레드 종료 시 자동 해제");
     }
     
     // 메모리 구조 시각화
@@ -90,5 +90,10 @@ public class ThreadMemoryStructure {
         System.out.println("│  ├─ localString (다른 참조)      │");
         System.out.println("│  └─ 메서드 호출 스택             │");
         System.out.println("└─────────────────────────────────┘");
+        
+        System.out.println("\n// 핵심 포인트:");
+        System.out.println("// 1. Heap: 모든 스레드가 공유 (동시성 문제 가능)");
+        System.out.println("// 2. Stack: 각 스레드마다 독립적 (안전함)");
+        System.out.println("// 3. 지역 변수는 스레드 안전, 공유 변수는 동기화 필요");
     }
 }
