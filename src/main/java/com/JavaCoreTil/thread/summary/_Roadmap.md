@@ -1,5 +1,6 @@
 ---
-🟢 0단계: Thread 기초 이론
+✅ 1단계: Thread 기초 이론 (완료)
+├─ 멀티태스킹과 멀티프로세싱 : 운영체제 레벨 개념, 시분할
 ├─ Process vs Thread : 프로세스/스레드 차이, 메모리 구조
 ├─ JVM Thread 모델 : OS 매핑, 플랫폼별 차이
 ├─ Thread 생명주기 : NEW → RUNNABLE → BLOCKED/WAITING/TIMED_WAITING → TERMINATED
@@ -7,56 +8,76 @@
 └─ 메모리 구조 : Thread Stack(지역변수), Heap(공유 객체)
 
 ---
-🟡 1단계: Thread 생성과 제어
+🟡 2단계: Thread 생성과 제어
 ├─ Thread 생성 방법 : 상속, Runnable, 람다, 익명 클래스
 ├─ 주요 제어 메서드 : start(), join(), sleep(), interrupt()
-├─ Thread 속성 관리 : 이름, 우선순위, 데몬, 그룹, 상태
-└─ 안전한 종료 : interrupt, volatile, 리소스 정리
+├─ Thread 속성 관리 : 이름, 우선순위, 데몬 스레드
+├─ yield() : 스레드 양보, CPU 사용권 포기
+└─ 안전한 종료 : interrupt 활용, 리소스 정리
 
 ---
-🟠 2단계: 동시성 문제와 synchronized
+🟠 3단계: 메모리 가시성 (Memory Visibility)
+├─ 메모리 가시성 문제 : CPU 캐시, 메모리 일관성
+├─ volatile 키워드 : 가시성 보장, 재정렬 방지
+├─ 자바 메모리 모델(JMM) : happens-before 관계
+├─ volatile 활용 패턴 : 플래그 변수, 상태 관리
+└─ 메모리 가시성 vs 원자성 : 차이점과 주의사항
+
+---
+🔴 4단계: 동시성 문제와 synchronized
 ├─ Race Condition : 공유 변수 동시 접근, 경쟁 상황
-├─ Critical Section : 상호 배제(Mutex)
+├─ Critical Section : 상호 배제(Mutex), 임계 영역
 ├─ synchronized 동기화 : 메서드/블록, 객체 락
-└─ 데드락(Deadlock) : 발생 조건, 간단 재현
+├─ synchronized 활용 : 인스턴스 락 vs 클래스 락
+└─ 데드락(Deadlock) : 발생 조건, 간단 재현, 예방 방법
 
 ---
-🔵 3단계: Thread 간 협력과 통신
-├─ wait/notify 메커니즘 : wait(), notify(), notifyAll(), 모니터, Spurious Wakeup
+🔵 5단계: Thread 간 협력과 통신
+├─ wait/notify 메커니즘 : wait(), notify(), notifyAll()
 ├─ Producer-Consumer 패턴 : 버퍼, 대기/통지
-└─ 객체 락 심화 : Entry Set, Wait Set
+├─ 객체 락과 모니터 : Entry Set, Wait Set
+└─ Spurious Wakeup : 가짜 깨어남, while 루프 필요성
 
 ---
-🟣 4단계: 실무 Thread Pool 활용
-├─ ExecutorService : newFixedThreadPool 등
-├─ Callable/Future : submit, get, cancel, 타임아웃
-├─ ThreadPoolExecutor : core/max size, queue, 정책
-├─ 작업 우선순위 관리 : PriorityBlockingQueue, 커스텀 Comparator, 긴급도별 처리
-└─ Fork/Join Framework : 분할정복, RecursiveTask/Action
+🟣 6단계: 고급 동기화 도구
+├─ ReentrantLock : 명시적 락, tryLock, 공정성
+├─ Lock Condition : await/signal, 조건별 대기
+├─ AtomicInteger : CAS 기반 원자적 연산
+├─ CountDownLatch : 여러 스레드 동기화
+└─ Semaphore : 리소스 접근 제한
 
 ---
-🟤 5단계: 고급 동기화와 성능 최적화
-├─ 명시적 락 : ReentrantLock, ReadWriteLock, StampedLock
-├─ Atomic/CAS : AtomicInteger 등, compareAndSet, Lock-free
-├─ volatile/메모리 가시성 : 가시성, 재정렬 방지, Double-checked Locking
-├─ 동기화 유틸리티 : CountDownLatch, Semaphore, CyclicBarrier, Exchanger
-├─ ThreadLocal : 활용, 메모리 누수 방지
-└─ 성능 측정/모니터링 : Thread Dump, Lock Contention, 병목 분석
+🟤 7단계: Thread Pool과 Executor
+├─ Thread Pool 필요성 : 스레드 생성 비용, 리소스 관리
+├─ ExecutorService : newFixedThreadPool, newCachedThreadPool
+├─ Callable/Future : submit, get, cancel
+├─ ThreadPoolExecutor : 기본 설정과 모니터링
+├─ ExecutorService 종료 : shutdown, shutdownNow
+└─ Fork/Join Framework : 분할정복, RecursiveTask/Action, Work Stealing
 
 ---
-⚡ 6단계: Virtual Thread (Java 19+)
-├─ Virtual Thread 개념 : 경량 스레드, Platform Thread vs Virtual Thread
-├─ 생성과 사용법 : Thread.ofVirtual(), Executors.newVirtualThreadPerTaskExecutor()
-├─ 내부 구조 : Carrier Thread, ForkJoinPool, 스케줄링
-├─ I/O 최적화 : Blocking I/O 처리, 컨텍스트 스위칭 비용 절약
-├─ 제약사항 : synchronized 블록, native 메서드, CPU 집약적 작업
-└─ 실무 적용 : 대용량 동시 요청 처리, 마이크로서비스 아키텍처
+🟢 8단계: 동시성 컬렉션 기초
+├─ 동시성 컬렉션 필요성 : 일반 컬렉션의 한계
+├─ ConcurrentHashMap : 기본 사용법, 성능 특징
+├─ BlockingQueue : offer, poll, take
+├─ ArrayBlockingQueue vs LinkedBlockingQueue
+└─ 동시성 컬렉션 선택 기준
 
 ---
-🌐 네트워크와 관련된 멀티스레딩
-├─ 소켓 통신에서 Thread 역할 : 클라이언트별 Thread, ThreadPool
-├─ 비동기 네트워크 I/O : NIO, Selector
-├─ 동시성 이슈 : 네트워크 프로그래밍 특징
-└─ 실시간 서버 설계 : Thread 안전성, 효율적 통신
+⚡ 9단계: Virtual Thread (Java 19+)
+├─ Virtual Thread 개념 : 경량 스레드, Platform Thread 차이
+├─ 생성과 사용법 : Thread.ofVirtual(), 기본 사용
+├─ 내부 구조 : Carrier Thread, 스케줄링
+├─ 적용 시나리오 : 대량 동시 작업, I/O 집약적 작업
+├─ 제약사항 : synchronized 블록, CPU 집약적 작업
+└─ 마이그레이션 가이드 : 기존 코드에서 전환
+
+---
+🎯 실무 핵심 포인트
+├─ Thread 안전성 : Immutable 객체, 방어적 복사
+├─ 성능 고려사항 : 락 경합 최소화, 적절한 동기화 선택
+├─ 디버깅 팁 : Thread Dump 읽기, 데드락 탐지
+├─ 모범 사례 : 공유 상태 최소화, 단순한 동기화
+└─ 주의사항 : 과도한 동기화, 성능 vs 안전성 균형
 
 ---

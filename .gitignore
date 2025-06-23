@@ -44,3 +44,4 @@ bin/
 /test_data.txt
 /large_file.txt
 /copied_file.txt
+/src/main/java/com/JavaCoreTil/io/filePath/test.txt

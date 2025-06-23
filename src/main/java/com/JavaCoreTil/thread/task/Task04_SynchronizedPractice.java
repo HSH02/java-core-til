@@ -34,8 +34,12 @@ public class Task04_SynchronizedPractice {
         counter = 0;
         long start = System.currentTimeMillis();
         
-        // TODO: 3개 스레드가 unsafeIncrement() 실행
-        // 힌트: Thread t1 = new Thread(() -> unsafeIncrement());
+        Thread t1 = new Thread(() -> unsafeIncrement());
+        Thread t2 = new Thread(() -> unsafeIncrement());
+        Thread t3 = new Thread(() -> unsafeIncrement());
+        
+        t1.start(); t2.start(); t3.start();
+        t1.join(); t2.join(); t3.join();
         
         long end = System.currentTimeMillis();
         System.out.println("결과: " + counter + " (예상: 3000)");
@@ -46,7 +50,12 @@ public class Task04_SynchronizedPractice {
         counter = 0;
         long start = System.currentTimeMillis();
         
-        // TODO: 3개 스레드가 safeIncrement() 실행
+        Thread t1 = new Thread(() -> safeIncrement());
+        Thread t2 = new Thread(() -> safeIncrement());
+        Thread t3 = new Thread(() -> safeIncrement());
+        
+        t1.start(); t2.start(); t3.start();
+        t1.join(); t2.join(); t3.join();
         
         long end = System.currentTimeMillis();
         System.out.println("결과: " + counter + " (예상: 3000)");
@@ -57,26 +66,35 @@ public class Task04_SynchronizedPractice {
         counter = 0;
         long start = System.currentTimeMillis();
         
-        // TODO: 3개 스레드가 optimizedIncrement() 실행
+        Thread t1 = new Thread(() -> optimizedIncrement());
+        Thread t2 = new Thread(() -> optimizedIncrement());
+        Thread t3 = new Thread(() -> optimizedIncrement());
+        
+        t1.start(); t2.start(); t3.start();
+        t1.join(); t2.join(); t3.join();
         
         long end = System.currentTimeMillis();
         System.out.println("결과: " + counter + " (예상: 3000)");
         System.out.println("시간: " + (end - start) + "ms");
     }
     
-    // TODO 5: 이 메서드들을 구현하세요
-    
     private static void unsafeIncrement() {
-        // TODO: counter를 1000번 증가 (synchronized 없음)
+        for (int i = 0; i < 1000; i++) {
+            counter++; // Race Condition 발생 가능
+        }
     }
     
-    // TODO: synchronized 키워드 추가
-    private static void safeIncrement() {
-        // TODO: counter를 1000번 증가 (synchronized method)
+    private static synchronized void safeIncrement() {
+        for (int i = 0; i < 1000; i++) {
+            counter++; // synchronized 메서드로 보호
+        }
     }
     
     private static void optimizedIncrement() {
-        // TODO: synchronized 블록만 사용해서 counter를 1000번 증가
-        // 힌트: synchronized (Task04_SynchronizedPractice.class) { counter++; }
+        for (int i = 0; i < 1000; i++) {
+            synchronized (Task04_SynchronizedPractice.class) {
+                counter++; // synchronized 블록으로 최소한만 보호
+            }
+        }
     }
 }
