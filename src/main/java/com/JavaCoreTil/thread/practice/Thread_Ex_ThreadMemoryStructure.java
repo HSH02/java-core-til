@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Thread 메모리 구조 데모
  */
-public class ThreadMemoryStructure {
+public class Thread_Ex_ThreadMemoryStructure {
     
     // Heap 영역 - 모든 스레드가 공유
     private static int sharedCounter = 0;

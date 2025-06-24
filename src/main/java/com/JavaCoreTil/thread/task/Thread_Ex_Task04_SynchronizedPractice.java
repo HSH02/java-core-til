@@ -3,7 +3,7 @@ package com.JavaCoreTil.thread.task;
 /**
  * Task04: synchronized로 동시성 문제 해결
  */
-public class Task04_SynchronizedPractice {
+public class Thread_Ex_Task04_SynchronizedPractice {
     
     private static int counter = 0;
     
@@ -85,7 +85,7 @@ public class Task04_SynchronizedPractice {
     
     private static void optimizedIncrement() {
         for (int i = 0; i < 1000; i++) {
-            synchronized (Task04_SynchronizedPractice.class) {
+            synchronized (Thread_Ex_Task04_SynchronizedPractice.class) {
                 counter++; // synchronized 블록으로 최소 보호
             }
         }

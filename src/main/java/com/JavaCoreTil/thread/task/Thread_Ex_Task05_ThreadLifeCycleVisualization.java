@@ -3,7 +3,7 @@ package com.JavaCoreTil.thread.task;
 /**
  * Task05: Thread 생명주기 시각화
  */
-public class Task05_ThreadLifeCycleVisualization {
+public class Thread_Ex_Task05_ThreadLifeCycleVisualization {
     
     private static final Object lock = new Object();
     

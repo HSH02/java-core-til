@@ -3,7 +3,7 @@ package com.JavaCoreTil.thread.practice;
 /**
  * join() 메서드 실습
  */
-public class JoinPractice {
+public class Thread_Ex_JoinPractice {
 
 	public static void main(String[] args) throws InterruptedException {
 		System.out.println("=== join() 실습 ===");

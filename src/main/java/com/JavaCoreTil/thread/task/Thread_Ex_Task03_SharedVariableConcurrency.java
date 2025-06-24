@@ -3,7 +3,7 @@ package com.JavaCoreTil.thread.task;
 /**
  * Task03: 공유 변수 동시성 문제
  */
-public class Task03_SharedVariableConcurrency {
+public class Thread_Ex_Task03_SharedVariableConcurrency {
     
     private static int sharedCounter = 0;
     

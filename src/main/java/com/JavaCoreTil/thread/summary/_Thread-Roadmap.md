@@ -24,7 +24,7 @@
 └─ 메모리 가시성 vs 원자성 : 차이점과 주의사항
 
 ---
-🔴 4단계: 동시성 문제와 synchronized
+✅ 4단계: 동시성 문제와 synchronized (완료)
 ├─ Race Condition : 공유 변수 동시 접근, 경쟁 상황
 ├─ Critical Section : 상호 배제(Mutex), 임계 영역
 ├─ synchronized 동기화 : 메서드/블록, 객체 락
@@ -32,16 +32,18 @@
 └─ 데드락(Deadlock) : 발생 조건, 간단 재현, 예방 방법
 
 ---
-🔵 5단계: Thread 간 협력과 통신
+✅ 5단계: Thread 간 협력과 통신 (완료)
 ├─ wait/notify 메커니즘 : wait(), notify(), notifyAll()
 ├─ Producer-Consumer 패턴 : 버퍼, 대기/통지
 ├─ 객체 락과 모니터 : Entry Set, Wait Set
 └─ Spurious Wakeup : 가짜 깨어남, while 루프 필요성
 
 ---
-🟣 6단계: 고급 동기화 도구
-├─ ReentrantLock : 명시적 락, tryLock, 공정성
-├─ Lock Condition : await/signal, 조건별 대기
+🟣 6단계: 고급 동기화 도구 (진행 중)
+├─ Lock 인터페이스 : synchronized의 한계, 명시적 락 제어 : 진행중
+├─ ReentrantLock : 명시적 락, tryLock, 타임아웃, 공정성 : 진행중
+├─ Lock vs synchronized : 유연성, 성능, 사용 시나리오 : 진행중
+├─ Lock Condition : await/signal, 조건별 대기 : 진행중
 ├─ AtomicInteger : CAS 기반 원자적 연산
 ├─ CountDownLatch : 여러 스레드 동기화
 └─ Semaphore : 리소스 접근 제한

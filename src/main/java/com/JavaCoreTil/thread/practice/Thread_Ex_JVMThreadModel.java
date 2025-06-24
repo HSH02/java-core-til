@@ -3,7 +3,7 @@ package com.JavaCoreTil.thread.practice;
 /**
  * JVM Thread 모델 데모
  */
-public class JVMThreadModel {
+public class Thread_Ex_JVMThreadModel {
     
     public static void main(String[] args) throws InterruptedException {
         demonstrateJVMThreadMapping();

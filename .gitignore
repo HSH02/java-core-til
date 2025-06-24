@@ -45,3 +45,4 @@ bin/
 /large_file.txt
 /copied_file.txt
 /src/main/java/com/JavaCoreTil/io/filePath/test.txt
+/.cursor/rules/

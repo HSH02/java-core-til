@@ -3,7 +3,7 @@ package com.JavaCoreTil.thread.task;
 /**
  * Task01: 기본 Thread 생성과 실행
  */
-public class Task01_BasicThreadCreation {
+public class Thread_Ex_Task01_BasicThreadCreation {
     
     public static void main(String[] args) throws InterruptedException {
         System.out.println("=== Thread 생성과 실행 ===");

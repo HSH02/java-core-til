@@ -3,7 +3,7 @@ package com.JavaCoreTil.thread.practice;
 /**
  * 메모리 가시성 실습
  */
-public class MemoryVisibilityPractice {
+public class Thread_Ex_MemoryVisibilityPractice {
 
 	public static void main(String[] args) {
 		System.out.println("=== 메모리 가시성 실습 ===");

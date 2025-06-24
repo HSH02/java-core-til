@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * Task06: yield()와 sleep() 차이점 시각화
  */
-public class Task06_YieldVsSleepVisualization {
+public class Thread_Ex_Task06_YieldVsSleepVisualization {
     
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
     
