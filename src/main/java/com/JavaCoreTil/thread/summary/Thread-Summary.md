@@ -4,6 +4,14 @@ Java Thread 프로그래밍에서 반드시 알아야 할 기초 개념들을 �
 
 ---
 
+## 💡 Thread 학습 팁
+- **단계별 학습**: 기본 개념 → 동시성 문제 → 동기화 → 고급 기법 순서로 학습
+- **실습 중심**: 이론보다는 직접 코드를 작성하고 문제를 체험해보기
+- **성능 측정**: System.currentTimeMillis()로 병렬 처리 효과 확인
+- **로그 관찰**: Thread.currentThread().getName()으로 스레드 동작 추적
+
+---
+
 ## 1. Thread 기본 개념
 
 ### Process와 Thread의 차이
@@ -38,6 +46,11 @@ Thread thread = new Thread(() -> {
 });
 thread.start();
 ```
+
+### ⚠️ 실무 권장사항
+- **Runnable 인터페이스 사용**: Thread 클래스 상속보다 유연함
+- **의미있는 스레드 이름**: `new Thread(task, "작업명")` 형태로 디버깅 용이
+- **예외 처리**: InterruptedException은 항상 적절히 처리
 
 ### 주요 메서드
 ```java

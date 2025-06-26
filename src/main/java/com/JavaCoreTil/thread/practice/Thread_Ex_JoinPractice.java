@@ -14,6 +14,12 @@ public class Thread_Ex_JoinPractice {
 		task2_WithJoin();
 		task3_JoinWithTimeout();
 		task4_RealWorldScenario();
+		
+		System.out.println("\n=== Join Practice 완료 ===");
+		
+		// 추가: 병렬 처리 vs 순차 처리 성능 비교
+		System.out.println("\n=== 성능 비교: 병렬 vs 순차 ===");
+		performanceComparison();
 	}
 
 	// join() 동작 원리 데모
@@ -156,5 +162,46 @@ public class Thread_Ex_JoinPractice {
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
+	}
+
+	/**
+	 * 병렬 처리와 순차 처리의 성능 차이 비교
+	 */
+	private static void performanceComparison() throws InterruptedException {
+		final int TASK_COUNT = 3;
+		final int TASK_DURATION = 1000; // 1초
+		
+		// 병렬 처리 (Thread 사용)
+		long parallelStart = System.currentTimeMillis();
+		Thread[] parallelTasks = new Thread[TASK_COUNT];
+		
+		for (int i = 0; i < TASK_COUNT; i++) {
+			final int taskId = i + 1;
+			parallelTasks[i] = new Thread(() -> {
+							try { Thread.sleep(TASK_DURATION); } catch (InterruptedException e) {}
+			System.out.println("병렬 작업 " + taskId + " 완료");
+		});
+		parallelTasks[i].start();
+	}
+	
+	// 모든 병렬 작업 완료 대기
+	for (Thread task : parallelTasks) {
+		task.join();
+	}
+	long parallelEnd = System.currentTimeMillis();
+	
+	// 순차 처리
+	long sequentialStart = System.currentTimeMillis();
+	for (int i = 0; i < TASK_COUNT; i++) {
+		try { Thread.sleep(TASK_DURATION); } catch (InterruptedException e) {}
+			System.out.println("순차 작업 " + (i + 1) + " 완료");
+		}
+		long sequentialEnd = System.currentTimeMillis();
+		
+		// 결과 출력
+		System.out.printf("병렬 처리 시간: %dms\n", parallelEnd - parallelStart);
+		System.out.printf("순차 처리 시간: %dms\n", sequentialEnd - sequentialStart);
+		System.out.printf("성능 향상: %.1f배\n", 
+			(double)(sequentialEnd - sequentialStart) / (parallelEnd - parallelStart));
 	}
 } 
