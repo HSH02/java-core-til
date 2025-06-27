@@ -1,134 +1,189 @@
 # Java Thread 핵심 정리
 
-Java Thread 프로그래밍에서 반드시 알아야 할 기초 개념들을 정리했습니다.
-
----
-
-## 💡 Thread 학습 팁
-- **단계별 학습**: 기본 개념 → 동시성 문제 → 동기화 → 고급 기법 순서로 학습
-- **실습 중심**: 이론보다는 직접 코드를 작성하고 문제를 체험해보기
-- **성능 측정**: System.currentTimeMillis()로 병렬 처리 효과 확인
-- **로그 관찰**: Thread.currentThread().getName()으로 스레드 동작 추적
+Java Thread 프로그래밍에서 반드시 알아야 할 기초적이고 실용적인 개념들을 정리한 문서입니다.
 
 ---
 
 ## 1. Thread 기본 개념
 
-### Process와 Thread의 차이
-- Process: 독립된 메모리 공간을 가진 실행 프로그램
-- Thread: 하나의 프로세스 내에서 메모리를 공유하며 실행되는 작업 단위
+### 핵심 개념
+- **Process**: 독립된 메모리 공간을 가진 실행 프로그램
+- **Thread**: 프로세스 내에서 메모리를 공유하며 실행되는 작업 단위
 
-### Thread 상태 변화
+### Thread 생명주기
 ```
 NEW → RUNNABLE → BLOCKED/WAITING/TIMED_WAITING → TERMINATED
 ```
 
-### 메모리 영역
-- **Stack 영역**: 각 Thread마다 독립적으로 할당 (지역변수, 메서드 호출 정보)
-- **Heap 영역**: 모든 Thread가 공유 (객체, 인스턴스 변수)
+### 메모리 구조
+| 영역 | 공유 여부 | 용도 |
+|------|-----------|------|
+| Stack | Thread별 독립 | 지역변수, 메서드 호출 정보 |
+| Heap | 모든 Thread 공유 | 객체, 인스턴스 변수 |
 
 ---
 
-## 2. Thread 생성과 실행
+## 2. Thread 생성과 제어
 
 ### 생성 방법
 ```java
-// Thread 클래스 상속
+// 방법 1: Thread 클래스 상속
 class MyThread extends Thread {
     public void run() {
         System.out.println("Thread 실행");
     }
 }
 
-// Runnable 인터페이스 구현 (권장)
+// 방법 2: Runnable 인터페이스 구현 (권장)
 Thread thread = new Thread(() -> {
     System.out.println("Thread 실행");
 });
-thread.start();
 ```
-
-### ⚠️ 실무 권장사항
-- **Runnable 인터페이스 사용**: Thread 클래스 상속보다 유연함
-- **의미있는 스레드 이름**: `new Thread(task, "작업명")` 형태로 디버깅 용이
-- **예외 처리**: InterruptedException은 항상 적절히 처리
 
 ### 주요 메서드
 ```java
-thread.start();        // Thread 시작
-thread.join();         // Thread 완료까지 무한 대기
-thread.join(1000);     // Thread 완료까지 최대 1초 대기
-Thread.sleep(1000);    // 현재 Thread를 1초 정지
-thread.interrupt();    // Thread 중단 요청
+thread.start();               // Thread 시작
+thread.join();                // Thread 완료까지 대기
+thread.join(1000);            // 최대 1초간 대기
+Thread.sleep(1000);           // 현재 Thread 1초 정지
+thread.interrupt();           // Thread 중단 요청
+thread.isInterrupted();       // 중단 요청 상태 확인
+Thread.yield();               // CPU 사용권 양보
 ```
 
-### join()과 sleep() 차이점
+### Thread 속성 관리
 ```java
-// join() - 다른 Thread의 완료를 기다림
-Thread worker = new Thread(() -> {
-    // 3초 걸리는 작업
-    try { Thread.sleep(3000); } catch (InterruptedException e) {}
-    System.out.println("작업 완료");
-});
+// Thread 이름 설정
+Thread thread = new Thread(task, "WorkerThread");  // 생성시 이름 지정
+thread.setName("CustomName");                      // 이름 변경
+String name = thread.getName();                    // 이름 조회
 
+// 우선순위 설정 (1-10, 기본값 5)
+thread.setPriority(Thread.MAX_PRIORITY);          // 최고 우선순위 (10)
+thread.setPriority(Thread.NORM_PRIORITY);         // 기본 우선순위 (5)
+thread.setPriority(Thread.MIN_PRIORITY);          // 최저 우선순위 (1)
+
+// 데몬 스레드 설정
+thread.setDaemon(true);                           // 데몬 스레드로 설정
+boolean isDaemon = thread.isDaemon();             // 데몬 여부 확인
+```
+
+### 데몬 스레드 특징
+| 구분 | 일반 스레드 | 데몬 스레드 |
+|------|-------------|-------------|
+| JVM 종료 | 모든 일반 스레드 완료 시 | JVM과 함께 강제 종료 |
+| 용도 | 주요 작업 수행 | 백그라운드 서비스 |
+| 예시 | 메인 스레드, 사용자 작업 | GC, 로그 정리, 모니터링 |
+
+### 메서드 비교
+| 메서드 | 대상 | 동작 | 용도 |
+|--------|------|------|------|
+| `join()` | 다른 Thread | 완료까지 대기 | 작업 순서 보장 |
+| `sleep()` | 현재 Thread | 지정 시간 정지 | 일시 정지 |
+| `yield()` | 현재 Thread | CPU 사용권 양보 | 스케줄링 조정 |
+
+### 안전한 Thread 종료 패턴
+```java
+class SafeWorkerThread extends Thread {
+    private volatile boolean running = true;
+    
+    public SafeWorkerThread() {
+        super("SafeWorker");        // 스레드 이름 설정
+        setDaemon(false);           // 일반 스레드로 설정
+    }
+    
+    @Override
+    public void run() {
+        while (running && !isInterrupted()) {
+            try {
+                doWork();           // 주요 작업 수행
+                Thread.sleep(1000); // 주기적 실행
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // 인터럽트 상태 복원
+                break;                              // 루프 종료
+            }
+        }
+        cleanup();  // 리소스 정리
+    }
+    
+    public void stopSafely() {
+        running = false;    // volatile 플래그 변경
+        interrupt();        // 인터럽트 신호 전송
+    }
+    
+    private void doWork() {
+        System.out.println(getName() + " 작업 수행 중...");
+    }
+    
+    private void cleanup() {
+        System.out.println(getName() + " 정리 완료");
+    }
+}
+
+// 사용 예시
+SafeWorkerThread worker = new SafeWorkerThread();
 worker.start();
-worker.join(1000);  // worker가 끝나거나 1초가 지날 때까지 대기
-System.out.println("메인 계속");  // 1초 후 실행 (작업이 끝나지 않아도)
+// 작업 완료 후
+worker.stopSafely();
+worker.join();  // 안전한 종료 대기
+```
 
-// sleep() - 현재 Thread를 정지
-Thread.sleep(1000);  // 현재 Thread가 무조건 1초 정지
-System.out.println("1초 후 실행");  // 정확히 1초 후 실행
+### 데몬 스레드 활용 예시
+```java
+// 로그 정리 데몬 스레드
+Thread logCleaner = new Thread(() -> {
+    while (true) {
+        cleanOldLogs();
+        try {
+            Thread.sleep(60000);  // 1분 주기
+        } catch (InterruptedException e) {
+            break;
+        }
+    }
+}, "LogCleaner");
+
+logCleaner.setDaemon(true);     // 데몬 스레드로 설정
+logCleaner.start();             // JVM 종료 시 자동 종료
 ```
 
 ---
 
 ## 3. 메모리 가시성 문제
 
-### 문제 상황
-```java
-class SharedData {
-    private boolean running = true;  // 공유 변수
-    
-    public void stop() {
-        running = false;  // Thread A에서 변경
-    }
-    
-    public void work() {
-        while (running) {  // Thread B에서 확인
-            // 변경사항을 못 볼 수 있음
-        }
-    }
-}
-```
+### 문제 발생 원인
+Thread별 CPU 캐시로 인해 메모리 변경사항이 다른 Thread에게 즉시 보이지 않음
 
-### volatile로 해결
+### 해결 방법
 ```java
+// 문제가 있는 코드
+private boolean running = true;
+
+// 해결된 코드
 private volatile boolean running = true;  // 가시성 보장
 ```
 
-### volatile의 한계
-- 가시성은 보장하지만 원자성은 보장하지 않음
-- `count++` 같은 복합 연산에는 사용 불가
+### volatile 특징
+- **장점**: 메모리 가시성 보장
+- **한계**: 원자성 보장 안 함 (복합 연산 불가)
 
 ---
 
-## 4. 동시성 문제와 해결
+## 4. 동시성 문제와 동기화
 
-### Race Condition
-여러 Thread가 동시에 같은 데이터를 수정할 때 발생하는 문제
-
+### Race Condition 문제
 ```java
+// 문제 코드
 class Counter {
     private int count = 0;
-    
     public void increment() {
-        count++;  // 원자적이지 않은 연산
+        count++;  // 원자적이지 않음
     }
 }
 ```
 
-### synchronized로 해결
+### synchronized 해결책
 ```java
-// 메서드 전체 동기화
+// 메서드 동기화
 public synchronized void increment() {
     count++;
 }
@@ -139,494 +194,187 @@ public void increment() {
         count++;
     }
 }
-
-// 클래스 레벨 동기화
-public static synchronized void staticMethod() {
-    // 클래스 단위로 동기화
-}
 ```
 
 ### Deadlock 방지
 ```java
-// 위험한 코드 - 락 순서가 다름
-public void method1() {
-    synchronized(lockA) {
-        synchronized(lockB) { /* 작업 */ }
-    }
-}
+// 위험: 서로 다른 락 순서
+synchronized(lockA) { synchronized(lockB) { ... } }
+synchronized(lockB) { synchronized(lockA) { ... } }
 
-public void method2() {
-    synchronized(lockB) {
-        synchronized(lockA) { /* 작업 */ }
-    }
-}
-
-// 안전한 코드 - 락 순서 통일
-public void method1() {
-    synchronized(lockA) {
-        synchronized(lockB) { /* 작업 */ }
-    }
-}
-
-public void method2() {
-    synchronized(lockA) {  // 같은 순서
-        synchronized(lockB) { /* 작업 */ }
-    }
-}
+// 안전: 동일한 락 순서
+synchronized(lockA) { synchronized(lockB) { ... } }
+synchronized(lockA) { synchronized(lockB) { ... } }
 ```
 
 ---
 
-## 5. Thread 간 협력과 통신
+## 5. Thread 간 통신
 
 ### wait/notify 메커니즘
-Thread 간 협력을 위한 기본 메커니즘
-
 ```java
-class SharedBuffer {
-    private final Object lock = new Object();
-    private boolean dataReady = false;
-    private String data;
-    
-    // 데이터 대기
-    public String consume() throws InterruptedException {
-        synchronized (lock) {
-            while (!dataReady) {  // while 루프 필수 (Spurious Wakeup 방지)
-                lock.wait();  // 데이터가 준비될 때까지 대기
-            }
-            dataReady = false;
-            return data;
-        }
-    }
-    
-    // 데이터 생산
-    public void produce(String newData) {
-        synchronized (lock) {
-            data = newData;
-            dataReady = true;
-            lock.notify();  // 대기 중인 Thread 깨우기
-        }
-    }
-}
-```
-
-### Producer-Consumer 패턴
-```java
-class BoundedBuffer<T> {
-    private final Queue<T> buffer = new LinkedList<>();
-    private final int capacity;
-    private final Object lock = new Object();
-    
-    public BoundedBuffer(int capacity) {
-        this.capacity = capacity;
-    }
-    
-    // Producer - 데이터 추가
-    public void put(T item) throws InterruptedException {
-        synchronized (lock) {
-            while (buffer.size() >= capacity) {
-                lock.wait();  // 버퍼가 가득 찰 때까지 대기
-            }
-            buffer.offer(item);
-            lock.notifyAll();  // Consumer에게 알림
-        }
-    }
-    
-    // Consumer - 데이터 소비
-    public T take() throws InterruptedException {
-        synchronized (lock) {
-            while (buffer.isEmpty()) {
-                lock.wait();  // 데이터가 있을 때까지 대기
-            }
-            T item = buffer.poll();
-            lock.notifyAll();  // Producer에게 알림
-            return item;
-        }
-    }
-}
-```
-
-### 객체 락과 모니터
-- **Entry Set**: 락을 얻기 위해 대기하는 Thread들
-- **Wait Set**: wait() 호출로 대기 중인 Thread들
-- **Monitor**: 락과 Wait Set을 관리하는 동기화 메커니즘
-
-```java
-// 모니터 동작 과정
-synchronized (obj) {           // Entry Set에서 대기 → 락 획득
-    while (!condition) {
-        obj.wait();            // Wait Set으로 이동
-    }
-    // 조건 만족 시 실행
-    obj.notify();              // Wait Set의 Thread 하나를 Entry Set으로 이동
-}
-```
-
-### Spurious Wakeup 대응
-가짜 깨어남을 방지하기 위해 반드시 while 루프 사용
-
-```java
-// 잘못된 코드 - if 사용
-synchronized (lock) {
-    if (!condition) {
-        lock.wait();  // 가짜 깨어남 시 조건 재확인 안 함
-    }
-    // 위험한 실행
-}
-
-// 올바른 코드 - while 사용
+// 기본 패턴
 synchronized (lock) {
     while (!condition) {
-        lock.wait();  // 깨어날 때마다 조건 재확인
+        lock.wait();           // 조건 만족까지 대기
     }
-    // 안전한 실행
+    // 작업 수행
+    lock.notify();            // 대기 Thread 깨움
 }
 ```
 
-### wait/notify vs notifyAll
+### 주요 메서드
 ```java
-// notify() - 하나의 Thread만 깨움
-lock.notify();    // 특정 Thread 하나만 선택 (예측 불가)
-
-// notifyAll() - 모든 대기 Thread 깨움
-lock.notifyAll(); // 모든 대기 Thread가 깨어나서 조건 재확인 (안전)
+lock.wait();                  // 무한 대기
+lock.wait(1000);              // 1초간 대기
+lock.notify();                // Thread 하나 깨움
+lock.notifyAll();             // 모든 Thread 깨움
 ```
+
+### 중요 규칙
+- **while 루프 필수**: Spurious Wakeup 방지
+- **synchronized 블록 내에서만 사용**: IllegalMonitorStateException 방지
+- **notifyAll() 권장**: 예측 가능한 동작
 
 ---
 
 ## 6. 고급 동기화 도구
 
-### Lock 인터페이스와 ReentrantLock
-synchronized의 한계를 극복하는 명시적 락 제어
-
+### ReentrantLock
 ```java
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.TimeUnit;
+Lock lock = new ReentrantLock();
 
-class BankAccount {
-    private int balance = 1000;
-    private final Lock lock = new ReentrantLock();
-    
-    // 기본 락 사용
-    public boolean withdraw(int amount) {
-        lock.lock();  // 명시적 락 획득
-        try {
-            if (balance >= amount) {
-                balance -= amount;
-                return true;
-            }
-            return false;
-        } finally {
-            lock.unlock();  // 반드시 finally에서 해제
-        }
-    }
-    
-    // 타임아웃이 있는 락
-    public boolean withdrawWithTimeout(int amount) {
-        try {
-            if (lock.tryLock(3, TimeUnit.SECONDS)) {  // 3초 대기
-                try {
-                    if (balance >= amount) {
-                        balance -= amount;
-                        return true;
-                    }
-                    return false;
-                } finally {
-                    lock.unlock();
-                }
-            }
-            return false;  // 타임아웃
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return false;
-        }
-    }
-    
-    // 인터럽트 응답 가능한 락
-    public boolean withdrawInterruptibly(int amount) throws InterruptedException {
-        lock.lockInterruptibly();  // 인터럽트 즉시 응답
-        try {
-            if (balance >= amount) {
-                balance -= amount;
-                return true;
-            }
-            return false;
-        } finally {
-            lock.unlock();
-        }
-    }
-}
+lock.lock();                          // 락 획득
+lock.unlock();                        // 락 해제 (finally 필수)
+lock.tryLock();                       // 즉시 시도
+lock.tryLock(3, TimeUnit.SECONDS);    // 3초 대기
+lock.lockInterruptibly();             // 인터럽트 가능
 ```
 
-### Lock vs synchronized 비교
-
-| 특징 | synchronized | Lock |
-|------|-------------|------|
-| 락 해제 | 자동 (블록 종료 시) | 수동 (finally 필수) |
-| 타임아웃 | 불가능 | `tryLock(time, unit)` |
-| 인터럽트 응답 | 제한적 | `lockInterruptibly()` |
-| 조건별 대기 | 불가능 | `Condition` 객체 |
-| 공정성 제어 | 불가능 | `new ReentrantLock(true)` |
-| 성능 | 락 경합 적을 때 빠름 | 락 경합 많을 때 빠름 |
-
-### Lock Condition을 활용한 Producer-Consumer
-조건별 대기를 통한 정교한 제어
-
+### Condition
 ```java
-import java.util.concurrent.locks.Condition;
+Condition condition = lock.newCondition();
 
-class BoundedQueue<T> {
-    private final Object[] buffer;
-    private int count = 0, in = 0, out = 0;
-    private final Lock lock = new ReentrantLock();
-    private final Condition notEmpty = lock.newCondition();  // 소비자용 조건
-    private final Condition notFull = lock.newCondition();   // 생산자용 조건
-    
-    public BoundedQueue(int capacity) {
-        buffer = new Object[capacity];
-    }
-    
-    // Producer - 데이터 추가
-    @SuppressWarnings("unchecked")
-    public void put(T item) throws InterruptedException {
-        lock.lock();
-        try {
-            while (count == buffer.length) {
-                notFull.await();  // 버퍼가 가득 찬 동안 대기
-            }
-            buffer[in] = item;
-            in = (in + 1) % buffer.length;  // 순환 버퍼
-            count++;
-            notEmpty.signal();  // 소비자에게 알림
-        } finally {
-            lock.unlock();
-        }
-    }
-    
-    // Consumer - 데이터 소비
-    @SuppressWarnings("unchecked")
-    public T take() throws InterruptedException {
-        lock.lock();
-        try {
-            while (count == 0) {
-                notEmpty.await();  // 버퍼가 빈 동안 대기
-            }
-            T item = (T) buffer[out];
-            buffer[out] = null;
-            out = (out + 1) % buffer.length;  // 순환 버퍼
-            count--;
-            notFull.signal();  // 생산자에게 알림
-            return item;
-        } finally {
-            lock.unlock();
-        }
-    }
-}
+condition.await();                    // 조건 대기
+condition.signal();                   // Thread 하나 깨움
+condition.signalAll();                // 모든 Thread 깨움
 ```
 
-### AtomicInteger - CAS 기반 원자적 연산
-Lock 없이도 안전한 원자적 연산 제공
-
+### AtomicInteger
 ```java
-import java.util.concurrent.atomic.AtomicInteger;
+AtomicInteger counter = new AtomicInteger(0);
 
-class Statistics {
-    private final AtomicInteger totalVisits = new AtomicInteger(0);
-    private final AtomicInteger uniqueUsers = new AtomicInteger(0);
-    
-    // 원자적 증가
-    public void recordVisit() {
-        int newCount = totalVisits.incrementAndGet();
-        System.out.println("총 방문수: " + newCount);
-    }
-    
-    // CAS 연산 활용
-    public boolean addUniqueUser() {
-        int current = uniqueUsers.get();
-        int next = current + 1;
-        // 현재 값이 예상값과 같으면 새 값으로 설정
-        return uniqueUsers.compareAndSet(current, next);
-    }
-    
-    // 원자적 업데이트
-    public void updateStats(int visitDelta, int userDelta) {
-        totalVisits.addAndGet(visitDelta);
-        uniqueUsers.addAndGet(userDelta);
-    }
-    
-    public void printStats() {
-        System.out.printf("방문수: %d, 사용자: %d%n", 
-            totalVisits.get(), uniqueUsers.get());
-    }
-}
+counter.get();                        // 값 조회
+counter.set(10);                      // 값 설정
+counter.incrementAndGet();            // 증가 후 반환
+counter.addAndGet(5);                 // 덧셈 후 반환
+counter.compareAndSet(10, 20);        // 비교 후 설정
 ```
 
-### CountDownLatch - 일회용 동기화 지점
-여러 Thread의 작업 완료를 기다리는 동기화 도구
-
+### CountDownLatch
 ```java
-import java.util.concurrent.CountDownLatch;
+CountDownLatch latch = new CountDownLatch(3);
 
-class PaymentProcessor {
-    public void processPayment(Payment payment) throws InterruptedException {
-        final int BANK_COUNT = 5;
-        CountDownLatch startSignal = new CountDownLatch(1);   // 시작 신호
-        CountDownLatch doneSignal = new CountDownLatch(BANK_COUNT);  // 완료 신호
-        AtomicInteger successCount = new AtomicInteger(0);
-        
-        // 5개 은행에서 병렬로 잔액 확인
-        for (int i = 0; i < BANK_COUNT; i++) {
-            final int bankId = i;
-            new Thread(() -> {
-                try {
-                    startSignal.await();  // 시작 신호 대기
-                    
-                    boolean result = checkBalanceFromBank(bankId, payment);
-                    if (result) {
-                        successCount.incrementAndGet();
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } finally {
-                    doneSignal.countDown();  // 작업 완료 신호
-                }
-            }).start();
-        }
-        
-        // 모든 Thread 동시 시작
-        startSignal.countDown();
-        
-        // 모든 은행 응답 대기
-        doneSignal.await();
-        
-        // 과반수 성공시 결제 진행
-        if (successCount.get() >= 3) {
-            processActualPayment(payment);
-        }
-    }
-    
-    private boolean checkBalanceFromBank(int bankId, Payment payment) {
-        // 은행별 잔액 확인 로직
-        return true;
-    }
-    
-    private void processActualPayment(Payment payment) {
-        // 실제 결제 처리
-    }
-}
+latch.await();                        // 카운트 0까지 대기
+latch.countDown();                    // 카운트 감소
+latch.getCount();                     // 현재 카운트 조회
 ```
 
-### Semaphore - 리소스 접근 제한
-동시에 접근할 수 있는 리소스 수를 제한하는 도구
-
+### Semaphore
 ```java
-import java.util.concurrent.Semaphore;
+Semaphore semaphore = new Semaphore(3);
 
-class DatabaseConnectionPool {
-    private final Semaphore semaphore;
-    
-    public DatabaseConnectionPool(int maxConnections) {
-        this.semaphore = new Semaphore(maxConnections);  // 최대 연결 수 제한
-    }
-    
-    // 기본 리소스 사용
-    public void executeQuery(String query) throws InterruptedException {
-        semaphore.acquire();  // 리소스 획득 (블로킹)
-        try {
-            System.out.println("쿼리 실행: " + query);
-            Thread.sleep(1000);  // 쿼리 실행 시뮬레이션
-        } finally {
-            semaphore.release();  // 리소스 해제
-        }
-    }
-    
-    // 타임아웃이 있는 리소스 사용
-    public boolean executeQueryWithTimeout(String query) throws InterruptedException {
-        if (semaphore.tryAcquire(3, TimeUnit.SECONDS)) {  // 3초 대기
-            try {
-                System.out.println("쿼리 실행: " + query);
-                Thread.sleep(1000);
-                return true;
-            } finally {
-                semaphore.release();
-            }
-        }
-        return false;  // 타임아웃
-    }
-    
-    // 공정한 리소스 할당
-    public static class FairConnectionPool {
-        private final Semaphore semaphore = new Semaphore(3, true);  // 공정성 보장
-        
-        public void executeQuery(String query) throws InterruptedException {
-            semaphore.acquire();  // FIFO 순서로 리소스 할당
-            try {
-                System.out.println("공정한 쿼리 실행: " + query);
-                Thread.sleep(1000);
-            } finally {
-                semaphore.release();
-            }
-        }
-    }
-}
+semaphore.acquire();                  // 허가 획득
+semaphore.release();                  // 허가 반환
+semaphore.tryAcquire();               // 즉시 시도
+semaphore.availablePermits();         // 사용 가능한 허가 수
 ```
 
-### 고급 동기화 도구 선택 가이드
+---
 
-| 상황 | 추천 도구 | 이유 |
+##  동기화 도구 선택 및 확인 사항
+
+| 상황 | 권장 도구 | 특징 |
 |------|----------|------|
-| 단순한 상호 배제 | `synchronized` | 간단하고 자동 해제 |
-| 타임아웃이 필요한 락 | `ReentrantLock` | `tryLock()` 지원 |
-| 조건별 대기가 필요 | `Lock + Condition` | 정교한 제어 가능 |
-| 원자적 카운터 | `AtomicInteger` | Lock 없이 고성능 |
-| 여러 작업 완료 대기 | `CountDownLatch` | 일회용 동기화 지점 |
-| 리소스 수 제한 | `Semaphore` | 동시 접근 제어 |
+| 간단한 락 제어 | `synchronized` | 자동 해제, 사용 간편 |
+| 타임아웃 필요 | `ReentrantLock` | 유연한 락 제어 |
+| 조건별 대기 | `Condition` | 정교한 Thread 제어 |
+| 원자적 연산 | `AtomicInteger` | Lock 없이 안전한 연산 |
+| 작업 완료 대기 | `CountDownLatch` | 일회용 동기화 지점 |
+| 리소스 수 제한 | `Semaphore` | 동시 접근 수 제한 |
+
+---
+
 
 ### 성능 고려사항
+| 상황 | 권장 동기화 | 이유 |
+|------|-------------|------|
+| 락 경합 적음 | `synchronized` | JVM 최적화, 사용 간편 |
+| 락 경합 많음 | `ReentrantLock` | CAS 기반, 더 나은 처리량 |
+| 단순 카운터 | `AtomicInteger` | Lock-free, 최고 성능 |
+| 복잡한 조건 | `Lock + Condition` | 정교한 제어 가능 |
+
+### 안전한 코딩 패턴
 ```java
-// 락 경합이 적은 경우: synchronized가 더 빠름 (JVM 최적화)
-public synchronized void lightContention() {
-    // 간단한 작업
+// 1. Lock 사용 시 반드시 finally 블록에서 해제
+Lock lock = new ReentrantLock();
+lock.lock();
+try {
+    // 작업 수행
+} finally {
+    lock.unlock();  // 반드시 해제
 }
 
-// 락 경합이 심한 경우: Lock이 더 빠름 (CAS 기반)
-private final Lock lock = new ReentrantLock();
-public void heavyContention() {
-    lock.lock();
-    try {
-        // 복잡한 작업
-    } finally {
-        lock.unlock();
+// 2. wait() 사용 시 while 루프 필수
+synchronized (lock) {
+    while (!condition) {    // if가 아닌 while 사용
+        lock.wait();
     }
 }
 
-// 단순 카운터: AtomicInteger가 가장 빠름
-private final AtomicInteger counter = new AtomicInteger(0);
-public void increment() {
-    counter.incrementAndGet();  // Lock 없이 원자적 연산
+// 3. 데드락 방지를 위한 동일한 락 순서
+void transfer(Account from, Account to, int amount) {
+    Account firstLock = from.getId() < to.getId() ? from : to;
+    Account secondLock = from.getId() < to.getId() ? to : from;
+    
+    synchronized (firstLock) {
+        synchronized (secondLock) {
+            // 이체 로직
+        }
+    }
 }
 ```
 
----
+### Thread 안전성 체크리스트
+- [ ] **공유 변수**에 적절한 동기화 적용
+- [ ] **volatile** 키워드 필요성 검토
+- [ ] **Thread 이름** 설정으로 디버깅 편의성 확보
+- [ ] **데몬 스레드** 여부 명확히 구분
+- [ ] **안전한 종료** 패턴 구현
+- [ ] **예외 처리** 시 인터럽트 상태 복원
 
-## 실무에서 주의할 점
+### 디버깅 및 모니터링
+```java
+// Thread 정보 조회
+Thread current = Thread.currentThread();
+System.out.println("Thread 이름: " + current.getName());
+System.out.println("Thread 상태: " + current.getState());
+System.out.println("데몬 여부: " + current.isDaemon());
+System.out.println("우선순위: " + current.getPriority());
 
-### Thread 생성
-- Thread 클래스 상속보다는 Runnable 인터페이스 구현을 권장
-- Lambda 표현식을 활용하면 코드가 간결해짐
+// 모든 활성 Thread 조회
+ThreadGroup group = Thread.currentThread().getThreadGroup();
+Thread[] threads = new Thread[group.activeCount()];
+group.enumerate(threads);
+for (Thread t : threads) {
+    if (t != null) {
+        System.out.println(t.getName() + " - " + t.getState());
+    }
+}
+```
 
-### 동기화
-- 필요한 부분만 동기화해서 성능 저하 최소화
-- 공유 데이터 접근 시 반드시 동기화 고려
-- 데드락 방지를 위해 락 순서 일관성 유지
-
-### 메모리 가시성
-- 단순한 플래그 변수는 volatile 사용
-- 복합 연산이 필요하면 synchronized 사용
-
-### Thread 종료
-- interrupt() 메서드로 안전하게 종료
-- while 루프에서 interrupt 상태 확인
-
----
+### 주의사항
+- **과도한 동기화** 피하기 (성능 저하)
+- **너무 작은 임계 영역** 분할하지 말기 (오버헤드)
+- **Thread 수** 적절히 제한 (메모리, CPU 고려)
+- **Thread 간 통신** 시 데이터 불변성 우선 고려
