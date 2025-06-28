@@ -39,11 +39,11 @@
 └─ Spurious Wakeup : 가짜 깨어남, while 루프 필요성
 
 ---
-🟣 6단계: 고급 동기화 도구 (진행 중)
-├─ Lock 인터페이스 : synchronized의 한계, 명시적 락 제어 : 진행중
-├─ ReentrantLock : 명시적 락, tryLock, 타임아웃, 공정성 : 진행중
-├─ Lock vs synchronized : 유연성, 성능, 사용 시나리오 : 진행중
-├─ Lock Condition : await/signal, 조건별 대기 : 진행중
+✅ 6단계: 고급 동기화 도구 (완료)
+├─ Lock 인터페이스 : synchronized의 한계, 명시적 락 제어 
+├─ ReentrantLock : 명시적 락, tryLock, 타임아웃, 공정성 
+├─ Lock vs synchronized : 유연성, 성능, 사용 시나리오 
+├─ Lock Condition : await/signal, 조건별 대기 
 ├─ AtomicInteger : CAS 기반 원자적 연산
 ├─ CountDownLatch : 여러 스레드 동기화
 └─ Semaphore : 리소스 접근 제한
