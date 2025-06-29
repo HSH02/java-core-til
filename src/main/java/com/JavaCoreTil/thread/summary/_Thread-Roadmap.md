@@ -58,7 +58,7 @@
 └─ Fork/Join Framework : 분할정복, RecursiveTask/Action, Work Stealing
 
 ---
-🟢 8단계: 동시성 컬렉션 기초
+✅ 8단계: 동시성 컬렉션 기초 (완료)
 ├─ 동시성 컬렉션 필요성 : 일반 컬렉션의 한계
 ├─ ConcurrentHashMap : 기본 사용법, 성능 특징
 ├─ BlockingQueue : offer, poll, take
@@ -77,7 +77,7 @@
 ---
 🎯 실무 핵심 포인트
 ├─ Thread 안전성 : Immutable 객체, 방어적 복사
-├─ 성능 고려사항 : 락 경합 최소화, 적절한 동기화 선택
+├─ 성능 고려사항 : 락 경합 최소화, 적절한 동시성 선택
 ├─ 디버깅 팁 : Thread Dump 읽기, 데드락 탐지
 ├─ 모범 사례 : 공유 상태 최소화, 단순한 동기화
 └─ 주의사항 : 과도한 동기화, 성능 vs 안전성 균형
