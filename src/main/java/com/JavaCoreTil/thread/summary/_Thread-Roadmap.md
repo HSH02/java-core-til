@@ -49,7 +49,7 @@
 └─ Semaphore : 리소스 접근 제한
 
 ---
-🟤 7단계: Thread Pool과 Executor
+✅ 7단계: Thread Pool과 Executor (완료)
 ├─ Thread Pool 필요성 : 스레드 생성 비용, 리소스 관리
 ├─ ExecutorService : newFixedThreadPool, newCachedThreadPool
 ├─ Callable/Future : submit, get, cancel
