@@ -378,3 +378,197 @@ for (Thread t : threads) {
 - **너무 작은 임계 영역** 분할하지 말기 (오버헤드)
 - **Thread 수** 적절히 제한 (메모리, CPU 고려)
 - **Thread 간 통신** 시 데이터 불변성 우선 고려
+
+---
+
+## 7. Thread Pool과 ExecutorService
+
+### Thread Pool의 필요성
+매번 새 스레드 생성 시 발생하는 비용을 줄이고 리소스를 효율적으로 관리
+
+### ExecutorService 주요 타입
+```java
+// 고정 크기 풀 (CPU 집약적 작업에 적합)
+ExecutorService fixedPool = Executors.newFixedThreadPool(4);
+
+// 동적 크기 풀 (I/O 집약적 작업에 적합)
+ExecutorService cachedPool = Executors.newCachedThreadPool();
+
+// 단일 스레드 풀 (순차 처리 보장)
+ExecutorService singlePool = Executors.newSingleThreadExecutor();
+```
+
+### Callable과 Future
+```java
+// 결과를 반환하는 작업
+Callable<String> task = () -> {
+    Thread.sleep(1000);
+    return "작업 완료";
+};
+
+// 미래 결과를 담는 컨테이너
+Future<String> future = executor.submit(task);
+
+// 결과 가져오기
+String result = future.get();                    // 블로킹 대기
+String result = future.get(3, TimeUnit.SECONDS); // 타임아웃 설정
+boolean done = future.isDone();                  // 완료 여부 확인
+boolean cancelled = future.cancel(true);         // 작업 취소
+```
+
+### ThreadPoolExecutor 설정
+```java
+ThreadPoolExecutor executor = new ThreadPoolExecutor(
+    2,                                    // corePoolSize: 기본 스레드 수
+    5,                                    // maximumPoolSize: 최대 스레드 수
+    60L, TimeUnit.SECONDS,               // keepAliveTime: 유휴 스레드 생존 시간
+    new ArrayBlockingQueue<>(10),        // workQueue: 작업 대기 큐
+    new ThreadPoolExecutor.CallerRunsPolicy()  // handler: 거부 정책
+);
+```
+
+### 안전한 종료 패턴
+```java
+executor.shutdown();                     // 새 작업 거부, 기존 작업 완료
+if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+    executor.shutdownNow();              // 강제 종료
+    if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+        System.err.println("완전 종료 실패");
+    }
+}
+```
+
+### ExecutorService 선택 기준
+| 상황 | 권장 타입 | 특징 |
+|------|----------|------|
+| CPU 집약적 작업 | `newFixedThreadPool(코어수)` | 최적 성능, 리소스 제한 |
+| I/O 집약적 작업 | `newCachedThreadPool()` | 동적 확장, 대기 시간 활용 |
+| 순차 처리 필요 | `newSingleThreadExecutor()` | 작업 순서 보장 |
+| 세밀한 제어 | `ThreadPoolExecutor` | 모든 설정 커스터마이징 |
+
+---
+
+## 8. 동시성 컬렉션
+
+### 일반 컬렉션의 문제점
+```java
+// 위험: 동시 접근 시 데이터 손실, 무한루프 가능
+Map<String, Integer> unsafeMap = new HashMap<>();
+List<String> unsafeList = new ArrayList<>();
+```
+
+### 동시성 컬렉션 해결책
+```java
+// 안전: 동시 접근 보장
+Map<String, Integer> safeMap = new ConcurrentHashMap<>();
+Queue<String> safeQueue = new ConcurrentLinkedQueue<>();
+```
+
+### ConcurrentHashMap 주요 기능
+```java
+ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
+
+// 기본 연산 (스레드 안전)
+map.put("key", 1);
+Integer value = map.get("key");
+map.remove("key");
+
+// 원자적 연산
+map.putIfAbsent("key", 1);               // 없을 때만 추가
+map.replace("key", 1, 2);                // 조건부 교체
+map.computeIfAbsent("key", k -> 1);      // 없으면 계산 후 추가
+map.merge("key", 1, Integer::sum);       // 병합 연산
+```
+
+### BlockingQueue 활용
+```java
+// Producer-Consumer 패턴
+BlockingQueue<String> queue = new LinkedBlockingQueue<>(10);
+
+// Producer
+queue.put("item");                       // 블로킹 추가
+boolean added = queue.offer("item");     // 즉시 시도
+boolean added = queue.offer("item", 1, TimeUnit.SECONDS); // 타임아웃
+
+// Consumer  
+String item = queue.take();              // 블로킹 대기
+String item = queue.poll();              // 즉시 시도
+String item = queue.poll(1, TimeUnit.SECONDS); // 타임아웃
+```
+
+### BlockingQueue 구현체 비교
+| 구현체 | 크기 | 특징 | 용도 |
+|--------|------|------|------|
+| `ArrayBlockingQueue` | 고정 | 배열 기반, 공정성 선택 가능 | 크기 제한 필요 |
+| `LinkedBlockingQueue` | 가변 | 링크 기반, 높은 처리량 | 일반적인 큐 |
+| `PriorityBlockingQueue` | 무제한 | 우선순위 기반 정렬 | 우선순위 처리 |
+| `SynchronousQueue` | 0 | 직접 전달, 저장 공간 없음 | 즉시 전달 |
+
+### 동시성 컬렉션 선택 기준
+| 용도 | 권장 컬렉션 | 특징 |
+|------|-------------|------|
+| 키-값 저장 | `ConcurrentHashMap` | 높은 동시성, 원자적 연산 |
+| 순서 없는 큐 | `ConcurrentLinkedQueue` | Lock-free, 높은 성능 |
+| Producer-Consumer | `BlockingQueue` | 블로킹 지원, 크기 제한 |
+| 집합 연산 | `ConcurrentSkipListSet` | 정렬 유지, 로그 시간 |
+
+### 실무 활용 패턴
+```java
+// 캐시 구현
+ConcurrentHashMap<String, Object> cache = new ConcurrentHashMap<>();
+
+// 원자적 카운터
+ConcurrentHashMap<String, AtomicInteger> counters = new ConcurrentHashMap<>();
+counters.computeIfAbsent("visits", k -> new AtomicInteger(0)).incrementAndGet();
+
+// 작업 큐 시스템
+BlockingQueue<Task> taskQueue = new LinkedBlockingQueue<>();
+
+// Producer
+taskQueue.put(new Task("work"));
+
+// Consumer
+Task task = taskQueue.take();
+task.execute();
+```
+
+### 성능 고려사항
+| 상황 | 권장 방식 | 이유 |
+|------|----------|------|
+| 읽기 많음 | `ConcurrentHashMap` | 읽기 시 락 없음 |
+| 쓰기 많음 | `ConcurrentHashMap` | 세그먼트 기반 락 |
+| 순서 중요 | `BlockingQueue` | FIFO 보장 |
+| 메모리 제한 | `ArrayBlockingQueue` | 고정 크기 |
+
+---
+
+## 동시성 프로그래밍 모범 사례
+
+### Thread 안전성 체크리스트
+- [ ] **공유 변수**에 적절한 동기화 적용
+- [ ] **volatile** 키워드 필요성 검토
+- [ ] **Thread 이름** 설정으로 디버깅 편의성 확보
+- [ ] **데몬 스레드** 여부 명확히 구분
+- [ ] **안전한 종료** 패턴 구현
+- [ ] **예외 처리** 시 인터럽트 상태 복원
+- [ ] **동시성 컬렉션** 활용으로 안전성 확보
+
+### 디버깅 및 모니터링
+```java
+// Thread 정보 조회
+Thread current = Thread.currentThread();
+System.out.println("Thread 이름: " + current.getName());
+System.out.println("Thread 상태: " + current.getState());
+System.out.println("데몬 여부: " + current.isDaemon());
+System.out.println("우선순위: " + current.getPriority());
+
+// 모든 활성 Thread 조회
+ThreadGroup group = Thread.currentThread().getThreadGroup();
+Thread[] threads = new Thread[group.activeCount()];
+group.enumerate(threads);
+for (Thread t : threads) {
+    if (t != null) {
+        System.out.println(t.getName() + " - " + t.getState());
+    }
+}
+```

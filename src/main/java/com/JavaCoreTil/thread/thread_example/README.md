@@ -44,9 +44,39 @@ Thread-Roadmap.md의 6단계에 맞춰 각 개념을 깔끔하게 확인할 수 
 - CountDownLatch (일회성 동기화)
 - Semaphore (리소스 접근 제한)
 
+### 7단계: Thread Pool과 Executor
+**파일**: `Stage7_ThreadPoolAndExecutor.java`
+- Thread Pool의 필요성과 장점
+- ExecutorService 다양한 타입
+- Callable과 Future (결과 반환)
+- ThreadPoolExecutor 세부 설정
+- Fork/Join Framework
+
+### 8단계: 동시성 컬렉션
+**파일**: `Stage8_ConcurrentCollections.java`
+- 동시성 문제가 있는 일반 컬렉션
+- ConcurrentHashMap, CopyOnWriteArrayList
+- BlockingQueue (생산자-소비자 패턴)
+- 성능 비교와 선택 기준
+
+### 9단계: Virtual Thread (Java 21+)
+**파일**: `Stage9_VirtualThread.java`
+- Virtual Thread 생성 방법
+- Platform Thread vs Virtual Thread 성능 비교
+- I/O 집약적 작업 최적화
+- Virtual Thread Executor 활용
+- 실무 웹 서버 시뮬레이션
+
 ## 주요 학습 목적
 
 - **1-2단계**: Thread 기본 개념과 생성/제어
 - **3-4단계**: 동시성 문제와 기본 해결책
 - **5-6단계**: 고급 동기화 메커니즘
+- **7-8단계**: Thread Pool과 동시성 컬렉션
+- **9단계**: 최신 Virtual Thread 기술
+
+## 실행 요구사항
+
+- **Stage 1-8**: Java 8 이상
+- **Stage 9**: Java 21 이상 (Virtual Thread 지원)
  
