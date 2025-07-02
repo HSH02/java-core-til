@@ -572,3 +572,263 @@ for (Thread t : threads) {
     }
 }
 ```
+
+---
+
+## 9. Virtual Thread (Java 19+)
+
+### Virtual Thread 개념
+Java 19부터 도입된 경량 스레드로, JVM이 관리하는 사용자 모드 스레드입니다.
+
+### Platform Thread vs Virtual Thread
+| 구분 | Platform Thread | Virtual Thread |
+|------|----------------|----------------|
+| 생성 비용 | 높음 (OS 스레드) | 매우 낮음 (JVM 관리) |
+| 메모리 사용량 | MB 단위 | KB 단위 |
+| 동시 생성 가능 수 | 수천 개 | 수백만 개 |
+| I/O 블로킹 시 | OS 스레드 블로킹 | Carrier Thread 해제 |
+| 스케줄링 | OS 스케줄러 | JVM 스케줄러 |
+
+### Virtual Thread 생성과 사용
+```java
+// 기본 생성
+Thread virtualThread = Thread.ofVirtual().start(() -> {
+    System.out.println("Virtual Thread 실행");
+});
+
+// 이름 지정
+Thread namedVirtualThread = Thread.ofVirtual()
+    .name("VirtualWorker")
+    .start(() -> {
+        doWork();
+    });
+
+// Executor와 함께 사용
+ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+executor.submit(() -> {
+    handleRequest();
+});
+```
+
+### Virtual Thread 내부 구조
+```java
+// Carrier Thread: Virtual Thread를 실제로 실행하는 Platform Thread
+// Virtual Thread가 I/O 블로킹되면 Carrier Thread는 다른 Virtual Thread 실행
+
+// 예시: 파일 읽기 작업
+Thread.ofVirtual().start(() -> {
+    try {
+        // I/O 작업 시작 - Carrier Thread는 다른 Virtual Thread로 전환
+        Files.readAllLines(Paths.get("large-file.txt"));
+        // I/O 완료 후 - 다시 Carrier Thread에 할당되어 실행 재개
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+});
+```
+
+### 적용 시나리오
+```java
+// 적합한 경우: 대량의 I/O 집약적 작업
+public class WebServer {
+    private final ExecutorService executor = 
+        Executors.newVirtualThreadPerTaskExecutor();
+    
+    public void handleRequests() {
+        for (int i = 0; i < 1000000; i++) {
+            executor.submit(() -> {
+                // HTTP 요청 처리 (I/O 대기 많음)
+                processHttpRequest();
+            });
+        }
+    }
+    
+    private void processHttpRequest() {
+        // 데이터베이스 조회 (I/O)
+        // 외부 API 호출 (I/O)  
+        // 파일 읽기/쓰기 (I/O)
+    }
+}
+
+// 부적합한 경우: CPU 집약적 작업
+public class MathCalculator {
+    // Virtual Thread보다 Platform Thread가 더 적합
+    public void calculatePrimes() {
+        ExecutorService executor = Executors.newFixedThreadPool(
+            Runtime.getRuntime().availableProcessors()
+        );
+        
+        for (int i = 0; i < 100; i++) {
+            executor.submit(() -> {
+                // CPU 집약적 소수 계산
+                findPrimesInRange(1000000, 2000000);
+            });
+        }
+    }
+}
+```
+
+### Virtual Thread 제약사항
+```java
+// 1. synchronized 블록 사용 시 Platform Thread에 고정 (Pinning)
+public class ProblematicCode {
+    private final Object lock = new Object();
+    
+    public void badPattern() {
+        Thread.ofVirtual().start(() -> {
+            synchronized (lock) {  // Virtual Thread가 Platform Thread에 고정됨
+                doLongRunningIO();  // 성능 저하 발생
+            }
+        });
+    }
+    
+    // 해결책: ReentrantLock 사용
+    private final ReentrantLock reentrantLock = new ReentrantLock();
+    
+    public void goodPattern() {
+        Thread.ofVirtual().start(() -> {
+            reentrantLock.lock();
+            try {
+                doLongRunningIO();  // Virtual Thread 장점 유지
+            } finally {
+                reentrantLock.unlock();
+            }
+        });
+    }
+}
+
+// 2. JNI 호출 시에도 Pinning 발생
+public class NativeCallExample {
+    public void problematicNativeCall() {
+        Thread.ofVirtual().start(() -> {
+            // JNI 호출로 인한 Pinning
+            System.loadLibrary("nativeLib");
+            nativeMethod();  // Platform Thread에 고정
+        });
+    }
+    
+    private native void nativeMethod();
+}
+```
+
+### 마이그레이션 가이드
+```java
+// 기존 코드
+ExecutorService oldExecutor = Executors.newFixedThreadPool(100);
+oldExecutor.submit(() -> handleRequest());
+
+// Virtual Thread로 마이그레이션
+ExecutorService newExecutor = Executors.newVirtualThreadPerTaskExecutor();
+newExecutor.submit(() -> handleRequest());  // 동일한 코드
+
+// 또는 직접 생성
+Thread.ofVirtual().start(() -> handleRequest());
+```
+
+### 성능 모니터링
+```java
+// Virtual Thread 정보 확인
+public class VirtualThreadMonitoring {
+    public static void monitorVirtualThreads() {
+        Thread.ofVirtual().name("MonitoredVirtualThread").start(() -> {
+            Thread current = Thread.currentThread();
+            System.out.println("Thread 이름: " + current.getName());
+            System.out.println("Virtual Thread 여부: " + current.isVirtual());
+            System.out.println("Thread 클래스: " + current.getClass().getSimpleName());
+            
+            // 작업 수행
+            doWork();
+        });
+    }
+    
+    private static void doWork() {
+        try {
+            // I/O 시뮬레이션
+            Thread.sleep(1000);
+            System.out.println("작업 완료");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}
+```
+
+### Virtual Thread 사용 권장사항
+| 상황 | 권장 사항 | 이유 |
+|------|----------|------|
+| 대량 I/O 작업 | Virtual Thread | 메모리 효율성, 높은 동시성 |
+| CPU 집약적 작업 | Platform Thread | 오버헤드 없는 직접 실행 |
+| 혼합 워크로드 | 상황별 선택 | I/O 비율에 따라 판단 |
+| 레거시 시스템 | 점진적 마이그레이션 | 호환성 확인 후 적용 |
+
+### 실무 활용 예시
+```java
+// 웹 크롤러 예시
+public class WebCrawler {
+    private final ExecutorService executor = 
+        Executors.newVirtualThreadPerTaskExecutor();
+    
+    public void crawlWebsites(List<String> urls) {
+        List<CompletableFuture<String>> futures = urls.stream()
+            .map(url -> CompletableFuture.supplyAsync(() -> {
+                return fetchContent(url);  // I/O 집약적 작업
+            }, executor))
+            .toList();
+        
+        // 모든 작업 완료 대기
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+            .join();
+        
+        executor.shutdown();
+    }
+    
+    private String fetchContent(String url) {
+        // HTTP 요청, 응답 처리 (I/O 작업)
+        // Virtual Thread의 장점을 최대한 활용
+        return "content from " + url;
+    }
+}
+```
+
+---
+
+## 동시성 프로그래밍 모범 사례
+
+### Thread 안전성 체크리스트
+- [ ] **공유 변수**에 적절한 동기화 적용
+- [ ] **volatile** 키워드 필요성 검토
+- [ ] **Thread 이름** 설정으로 디버깅 편의성 확보
+- [ ] **데몬 스레드** 여부 명확히 구분
+- [ ] **안전한 종료** 패턴 구현
+- [ ] **예외 처리** 시 인터럽트 상태 복원
+- [ ] **동시성 컬렉션** 활용으로 안전성 확보
+- [ ] **Virtual Thread** 적용 시나리오 검토
+
+### 디버깅 및 모니터링
+```java
+// Thread 정보 조회
+Thread current = Thread.currentThread();
+System.out.println("Thread 이름: " + current.getName());
+System.out.println("Thread 상태: " + current.getState());
+System.out.println("데몬 여부: " + current.isDaemon());
+System.out.println("우선순위: " + current.getPriority());
+System.out.println("Virtual Thread 여부: " + current.isVirtual());
+
+// 모든 활성 Thread 조회
+ThreadGroup group = Thread.currentThread().getThreadGroup();
+Thread[] threads = new Thread[group.activeCount()];
+group.enumerate(threads);
+for (Thread t : threads) {
+    if (t != null) {
+        System.out.println(t.getName() + " - " + t.getState() + 
+                          " (Virtual: " + t.isVirtual() + ")");
+    }
+}
+```
+
+### 주의사항
+- **과도한 동기화** 피하기 (성능 저하)
+- **너무 작은 임계 영역** 분할하지 말기 (오버헤드)
+- **Thread 수** 적절히 제한 (메모리, CPU 고려)
+- **Thread 간 통신** 시 데이터 불변성 우선 고려
+- **Virtual Thread** 사용 시 synchronized 블록 주의

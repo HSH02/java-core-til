@@ -1,6 +1,4 @@
-# Java Thread 실무 회상 퀴즈 (1~6단계)
- 
-**제한시간**: 30분
+# Java Thread 실무 회상 퀴즈 (1~9단계) 
 
 ---
 
@@ -185,5 +183,220 @@ AtomicInteger의 주요 메서드 4개를 작성하시오.
 **상황 B**: 동시 접근 가능한 리소스 수를 제한
 
 **답**: _________________
+
+---
+
+## 7단계: Thread Pool과 Executor
+
+### Q18. ExecutorService 생성
+다음 상황에 적합한 ExecutorService를 작성하시오.
+
+**CPU 집약적 작업 (4개 코어):**
+```java
+ExecutorService executor = Executors._______(4);
+```
+
+**I/O 집약적 작업 (동적 크기):**
+```java
+ExecutorService executor = Executors._______();
+```
+
+**순차 처리 보장:**
+```java
+ExecutorService executor = Executors._______();
+```
+
+### Q19. Callable과 Future
+결과를 반환하는 작업과 미래 결과를 처리하는 코드를 완성하시오.
+
+```java
+// 결과 반환 작업
+______<String> task = () -> {
+    return "작업 완료";
+};
+
+// 작업 제출 및 결과 처리
+______<String> future = executor.submit(task);
+String result = future._____();  // 결과 대기
+```
+
+### Q20. ExecutorService 안전한 종료
+ExecutorService를 안전하게 종료하는 패턴을 완성하시오.
+
+```java
+executor._____();  // 새 작업 거부
+if (!executor._____(5, TimeUnit.SECONDS)) {
+    executor._____();  // 강제 종료
+}
+```
+
+---
+
+## 8단계: 동시성 컬렉션
+
+### Q21. 동시성 컬렉션 선택
+다음 상황에 적합한 동시성 컬렉션을 선택하시오.
+
+**키-값 저장, 높은 동시성 필요:**
+```java
+Map<String, Integer> map = new _______<>();
+```
+
+**Producer-Consumer 패턴, 블로킹 지원:**
+```java
+BlockingQueue<String> queue = new _______<>();
+```
+
+**순서 없는 큐, Lock-free 성능:**
+```java
+Queue<String> queue = new _______<>();
+```
+
+### Q22. ConcurrentHashMap 원자적 연산
+ConcurrentHashMap의 원자적 연산 메서드를 완성하시오.
+
+```java
+ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
+
+// 없을 때만 추가
+map._____(key, 1);
+
+// 조건부 교체  
+map._____(key, 1, 2);
+
+// 없으면 계산 후 추가
+map._____(key, k -> 1);
+
+// 병합 연산
+map._____(key, 1, Integer::sum);
+```
+
+### Q23. BlockingQueue 메서드
+BlockingQueue의 주요 메서드들의 차이점을 작성하시오.
+
+| 메서드 | 블로킹 여부 | 타임아웃 지원 |
+|--------|-------------|---------------|
+| put() | _______ | _______ |
+| offer() | _______ | _______ |
+| take() | _______ | _______ |
+| poll() | _______ | _______ |
+
+---
+
+## 9단계: Virtual Thread (Java 19+)
+
+### Q24. Virtual Thread 생성
+Virtual Thread를 생성하는 방법을 작성하시오.
+
+**기본 생성:**
+```java
+Thread virtualThread = Thread._____().start(() -> {
+    // 작업 내용
+});
+```
+
+**이름 지정:**
+```java
+Thread virtualThread = Thread.ofVirtual()
+    ._____(threadName)
+    .start(task);
+```
+
+### Q25. Virtual Thread vs Platform Thread
+Virtual Thread와 Platform Thread의 차이점을 작성하시오.
+
+| 구분 | Virtual Thread | Platform Thread |
+|------|----------------|-----------------|
+| 생성 비용 | _______ | _______ |
+| 메모리 사용량 | _______ | _______ |
+| 동시 생성 가능 수 | _______ | _______ |
+| I/O 블로킹 시 | _______ | _______ |
+
+### Q26. Virtual Thread 적용 시나리오
+다음 상황에서 Virtual Thread 사용 적합성을 판단하시오.
+
+**상황 A**: 대량의 HTTP 요청 처리
+**적합성**: _______ (적합/부적합)
+
+**상황 B**: CPU 집약적 수학 계산
+**적합성**: _______ (적합/부적합)
+
+**상황 C**: 파일 I/O 작업 1000개 동시 처리
+**적합성**: _______ (적합/부적합)
+
+### Q27. Virtual Thread 제약사항
+Virtual Thread 사용 시 주의해야 할 제약사항 2가지를 작성하시오.
+
+1. _______ 블록 사용 시 Platform Thread로 고정
+2. _______ 집약적 작업에는 부적합
+
+---
+
+## 실무 종합 문제
+
+### Q28. Thread Pool 설정
+다음 요구사항에 맞는 ThreadPoolExecutor 설정을 완성하시오.
+
+**요구사항**: 기본 5개, 최대 10개, 유휴 60초, 대기 큐 20개
+
+```java
+ThreadPoolExecutor executor = new ThreadPoolExecutor(
+    _____,                              // corePoolSize
+    _____,                              // maximumPoolSize  
+    _____, TimeUnit.SECONDS,            // keepAliveTime
+    new ArrayBlockingQueue<>(_____),    // workQueue
+    new ThreadPoolExecutor._____()      // 거부 정책
+);
+```
+
+### Q29. 동시성 문제 해결
+다음 코드의 동시성 문제를 해결하는 3가지 방법을 작성하시오.
+
+```java
+// 문제 코드
+private int counter = 0;
+public void increment() {
+    counter++;
+}
+```
+
+**방법 1 (synchronized):**
+```java
+public _______ void increment() {
+    counter++;
+}
+```
+
+**방법 2 (AtomicInteger):**
+```java
+private _______ counter = new AtomicInteger(0);
+public void increment() {
+    counter._____();
+}
+```
+
+**방법 3 (ReentrantLock):**
+```java
+private final Lock lock = new ReentrantLock();
+public void increment() {
+    lock._____();
+    try {
+        counter++;
+    } finally {
+        lock._____();
+    }
+}
+```
+
+### Q30. 성능 최적화 선택
+다음 상황에서 최적의 동시성 도구를 선택하시오.
+
+**상황**: 100만 건의 간단한 카운터 증가 작업
+
+**선택지**: synchronized, ReentrantLock, AtomicInteger, volatile
+
+**최적 선택**: _________________
+
+**이유**: _________________________________
 
 ---
