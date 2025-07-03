@@ -8,7 +8,7 @@
 └─ 예외 처리 : IOException, try-with-resources
 
 ---
-⚡ 2단계: 바이트 기반 스트림
+✅ 2단계: 바이트 기반 스트림
 ├─ InputStream/OutputStream : 바이트 스트림의 최상위 클래스
 ├─ FileInputStream/FileOutputStream : 파일 바이트 입출력
 ├─ ByteArrayInputStream/ByteArrayOutputStream : 메모리 바이트 배열 처리
