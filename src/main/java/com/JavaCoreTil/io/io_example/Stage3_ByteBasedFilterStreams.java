@@ -82,10 +82,171 @@ public class Stage3_ByteBasedFilterStreams {
             bufferedOutput.write(data.getBytes());
             bufferedOutput.close(); // 보조 스트림을 닫으면 기본 스트림도 함께 닫힘
             
-            System.out.println("→ 보조 스트림 close() 시 기본 스트림도 자동 close()\n");
+            System.out.println("→ 보조 스트림 close() 시 기본 스트림도 자동 close()");
             
         } catch (IOException e) {
             System.out.println("Filter 스트림 오류: " + e.getMessage());
+        }
+        
+        // 실제 Filter Stream 구현 예시
+        demonstrateCustomFilterStream();
+        
+        System.out.println();
+    }
+    
+    /**
+     * 커스텀 Filter Stream 구현 예시
+     * 대문자 변환 필터와 암호화 필터를 직접 구현
+     */
+    private void demonstrateCustomFilterStream() {
+        System.out.println("\n=== 커스텀 Filter Stream 구현 ===");
+        
+        try {
+            // 1. 대문자 변환 Filter 출력 스트림
+            FileOutputStream baseOutput = new FileOutputStream(FilePathManager.getFilePath("uppercase_output.txt"));
+            UpperCaseFilterOutputStream uppercaseFilter = new UpperCaseFilterOutputStream(baseOutput);
+            
+            String originalText = "Hello World! Java Filter Stream Example.";
+            System.out.println("원본 텍스트: " + originalText);
+            
+            uppercaseFilter.write(originalText.getBytes());
+            uppercaseFilter.close();
+            
+            // 결과 확인
+            try (FileInputStream input = new FileInputStream(FilePathManager.getFilePath("uppercase_output.txt"))) {
+                byte[] result = input.readAllBytes();
+                System.out.println("변환된 텍스트: " + new String(result));
+            }
+            
+        } catch (IOException e) {
+            System.out.println("커스텀 Filter 오류: " + e.getMessage());
+        }
+        
+        try {
+            // 2. ROT13 암호화 Filter (읽기/쓰기)
+            String secretMessage = "Secret Message for ROT13 Encryption!";
+            System.out.println("\n원본 메시지: " + secretMessage);
+            
+            // 암호화하여 저장
+            FileOutputStream encryptOutput = new FileOutputStream(FilePathManager.getFilePath("encrypted.txt"));
+            ROT13FilterOutputStream encryptFilter = new ROT13FilterOutputStream(encryptOutput);
+            encryptFilter.write(secretMessage.getBytes());
+            encryptFilter.close();
+            
+            // 암호화된 파일 내용 확인
+            try (FileInputStream rawInput = new FileInputStream(FilePathManager.getFilePath("encrypted.txt"))) {
+                byte[] encrypted = rawInput.readAllBytes();
+                System.out.println("암호화된 텍스트: " + new String(encrypted));
+            }
+            
+            // 복호화하여 읽기
+            FileInputStream decryptInput = new FileInputStream(FilePathManager.getFilePath("encrypted.txt"));
+            ROT13FilterInputStream decryptFilter = new ROT13FilterInputStream(decryptInput);
+            byte[] decrypted = decryptFilter.readAllBytes();
+            decryptFilter.close();
+            
+            System.out.println("복호화된 텍스트: " + new String(decrypted));
+            
+        } catch (IOException e) {
+            System.out.println("ROT13 Filter 오류: " + e.getMessage());
+        }
+        
+        System.out.println("→ Filter Stream: 기본 기능에 추가 처리 로직을 투명하게 적용");
+    }
+    
+    /**
+     * 대문자 변환 Filter Output Stream
+     * 모든 소문자를 대문자로 변환하는 필터
+     */
+    static class UpperCaseFilterOutputStream extends FilterOutputStream {
+        public UpperCaseFilterOutputStream(OutputStream out) {
+            super(out);
+        }
+        
+        @Override
+        public void write(int b) throws IOException {
+            // 소문자인 경우 대문자로 변환
+            if (b >= 'a' && b <= 'z') {
+                b = b - 'a' + 'A';
+            }
+            super.write(b);
+        }
+        
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            // 배열의 각 바이트를 개별적으로 처리
+            for (int i = 0; i < len; i++) {
+                write(b[off + i]);
+            }
+        }
+    }
+    
+    /**
+     * ROT13 암호화 Filter Output Stream
+     * 알파벳을 13자리씩 이동시키는 간단한 암호화
+     */
+    static class ROT13FilterOutputStream extends FilterOutputStream {
+        public ROT13FilterOutputStream(OutputStream out) {
+            super(out);
+        }
+        
+        @Override
+        public void write(int b) throws IOException {
+            super.write(rot13Transform(b));
+        }
+        
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            for (int i = 0; i < len; i++) {
+                write(b[off + i]);
+            }
+        }
+        
+        private int rot13Transform(int b) {
+            if (b >= 'A' && b <= 'Z') {
+                return ((b - 'A' + 13) % 26) + 'A';
+            } else if (b >= 'a' && b <= 'z') {
+                return ((b - 'a' + 13) % 26) + 'a';
+            }
+            return b; // 알파벳이 아닌 경우 그대로 반환
+        }
+    }
+    
+    /**
+     * ROT13 복호화 Filter Input Stream
+     * ROT13는 자기 자신이 역함수이므로 동일한 변환 적용
+     */
+    static class ROT13FilterInputStream extends FilterInputStream {
+        public ROT13FilterInputStream(InputStream in) {
+            super(in);
+        }
+        
+        @Override
+        public int read() throws IOException {
+            int b = super.read();
+            if (b == -1) return -1;
+            return rot13Transform(b);
+        }
+        
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            int bytesRead = super.read(b, off, len);
+            if (bytesRead == -1) return -1;
+            
+            // 읽은 바이트들을 변환
+            for (int i = 0; i < bytesRead; i++) {
+                b[off + i] = (byte) rot13Transform(b[off + i]);
+            }
+            return bytesRead;
+        }
+        
+        private int rot13Transform(int b) {
+            if (b >= 'A' && b <= 'Z') {
+                return ((b - 'A' + 13) % 26) + 'A';
+            } else if (b >= 'a' && b <= 'z') {
+                return ((b - 'a' + 13) % 26) + 'a';
+            }
+            return b;
         }
     }
     
@@ -137,6 +298,8 @@ public class Stage3_ByteBasedFilterStreams {
         } catch (IOException e) {
             System.out.println("Buffered 스트림 오류: " + e.getMessage());
         }
+
+        System.out.println("=".repeat(50));
         
         // 읽기 성능 비교
         try {

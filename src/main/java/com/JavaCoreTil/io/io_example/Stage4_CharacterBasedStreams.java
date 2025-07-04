@@ -165,23 +165,18 @@ public class Stage4_CharacterBasedStreams {
         
         // StringWriter로 메모리에서 문자열 조립
         StringWriter stringWriter = new StringWriter();
-        
-        try {
-            stringWriter.write("StringWriter로 문자열 조립:\n");
-            stringWriter.write("- 첫 번째 라인\n");
-            stringWriter.write("- 두 번째 라인\n");
-            stringWriter.write("- 세 번째 라인\n");
-            
-            // 현재까지 조립된 문자열 확인
-            String assembledString = stringWriter.toString();
-            System.out.println("조립된 문자열:");
-            System.out.println(assembledString);
-            
-        } catch (IOException e) {
-            System.out.println("StringWriter 오류: " + e.getMessage());
-        }
-        
-        // StringReader로 문자열을 스트림처럼 읽기
+
+		stringWriter.write("StringWriter로 문자열 조립:\n");
+		stringWriter.write("- 첫 번째 라인\n");
+		stringWriter.write("- 두 번째 라인\n");
+		stringWriter.write("- 세 번째 라인\n");
+
+		// 현재까지 조립된 문자열 확인
+		String assembledString = stringWriter.toString();
+		System.out.println("조립된 문자열:");
+		System.out.println(assembledString);
+
+		// StringReader로 문자열을 스트림처럼 읽기
         String sourceText = "줄1: 첫 번째 줄\n줄2: 두 번째 줄\n줄3: 세 번째 줄";
         StringReader stringReader = new StringReader(sourceText);
         
