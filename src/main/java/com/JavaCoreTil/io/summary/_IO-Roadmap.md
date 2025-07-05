@@ -17,7 +17,7 @@
 └─ 리소스 관리 : close(), try-with-resources 패턴
 
 ---
-⚡ 3단계: 바이트 기반 보조 스트림
+✅ 3단계: 바이트 기반 보조 스트림
 ├─ FilterInputStream/FilterOutputStream : 보조 스트림 기반 클래스
 ├─ BufferedInputStream/BufferedOutputStream : 버퍼링을 통한 성능 향상
 ├─ DataInputStream/DataOutputStream : 기본 타입 데이터 입출력
@@ -26,7 +26,7 @@
 └─ 보조 스트림 조합 : 다중 기능 적용
 
 ---
-⚡ 4단계: 문자 기반 스트림
+⚡ 4단계: 문자 기반 스트림 
 ├─ Reader/Writer : 문자 스트림의 최상위 클래스
 ├─ FileReader/FileWriter : 파일 문자 입출력
 ├─ StringReader/StringWriter : 문자열 입출력

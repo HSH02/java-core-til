@@ -17,7 +17,7 @@ import com.JavaCoreTil.io.common.FilePathManager;
  */
 public class Stage3_ByteBasedFilterStreams {
     
-    private static final boolean DELETE_FLAG = false;
+    private static final boolean DELETE_FLAG = true;
     
     public static void main(String[] args) {
         Stage3_ByteBasedFilterStreams demo = new Stage3_ByteBasedFilterStreams();
