@@ -53,7 +53,7 @@
 └─ RandomAccessFile : 임의 접근, seek 포인터
 
 ---
-⚡ 7단계: 직렬화 (Serialization)
+✅ 7단계: 직렬화 (Serialization)
 ├─ 직렬화 개념 : 객체 → 바이트 스트림 변환
 ├─ ObjectInputStream/ObjectOutputStream : 객체 입출력
 ├─ Serializable 인터페이스 : 직렬화 가능 클래스
@@ -75,7 +75,7 @@
 ├─ Path 인터페이스 : 경로 추상화, 플랫폼 독립성
 ├─ Files 유틸리티 : 파일 조작 편의 메서드
 ├─ 파일 속성 관리 : 권한, 시간 정보, 메타데이터
-├─ 디렉토리 순회 : walkFileTree(), DirectoryStream
+├─ 디렉토리 순회 : walkFileTree(), DirectoryStream .
 ├─ 파일 변경 감지 : WatchService, 실시간 모니터링
 └─ Symbolic Link 처리 : 링크 파일 다루기
 
