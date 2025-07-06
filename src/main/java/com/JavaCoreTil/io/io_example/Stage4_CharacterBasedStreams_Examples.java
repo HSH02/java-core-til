@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 import com.JavaCoreTil.io.common.FilePathManager;
 
 /**
- * I/O 로드맵 4단계: 문자 기반 스트림 (Character-Based Streams)
+ * I/O 로드맵 4단계: 문자 기반 스트림 예제 모음
  * 
  * 학습 목표:
  * 1. Reader/Writer - 문자 스트림의 최상위 클래스
@@ -15,42 +15,46 @@ import com.JavaCoreTil.io.common.FilePathManager;
  * 4. PipedReader/PipedWriter - 스레드 간 통신
  * 5. 문자 인코딩 처리 - UTF-8, 다국어 지원
  * 6. 바이트 스트림과의 차이점 - 문자 단위 처리
+ * 7. 실무 활용 - 텍스트 파일 처리
  */
-public class Stage4_CharacterBasedStreams {
+public class Stage4_CharacterBasedStreams_Examples {
     
     private static final boolean DELETE_FLAG = false;
     
     public static void main(String[] args) {
-        Stage4_CharacterBasedStreams demo = new Stage4_CharacterBasedStreams();
+        Stage4_CharacterBasedStreams_Examples demo = new Stage4_CharacterBasedStreams_Examples();
         
         FilePathManager.ensureDirectoryExists();
         
-        System.out.println("=== I/O 로드맵 4단계: 문자 기반 스트림 ===\n");
+        System.out.println("=== I/O 로드맵 4단계: 문자 기반 스트림 예제 모음 ===\n");
         
         try {
             // 1. Reader/Writer 추상 클래스의 특징
-            demo.demonstrateReaderWriterConcepts();
+            demo.example1_ReaderWriterConcepts();
             
             // 2. FileReader/FileWriter - 파일 문자 처리
-            demo.demonstrateFileReaderWriter();
+            demo.example2_FileReaderWriter();
             
             // 3. StringReader/StringWriter - 메모리 기반 문자 처리
-            demo.demonstrateStringReaderWriter();
+            demo.example3_StringReaderWriter();
             
             // 4. 문자 인코딩과 다국어 처리
-            demo.demonstrateCharacterEncoding();
+            demo.example4_CharacterEncoding();
             
             // 5. 바이트 스트림 vs 문자 스트림 비교
-            demo.demonstrateByteVsCharacterStreams();
+            demo.example5_ByteVsCharacterStreams();
             
             // 6. PipedReader/PipedWriter - 스레드 간 통신
-            demo.demonstratePipedReaderWriter();
+            demo.example6_PipedReaderWriter();
             
             // 7. 실무 활용 - 텍스트 파일 처리
-            demo.demonstratePracticalTextProcessing();
+            demo.example7_PracticalTextProcessing();
             
-            System.out.println("\n=== 4단계 학습 완료! ===");
+            System.out.println("\n=== 4단계 예제 완료! ===");
             
+        } catch (Exception e) {
+            System.err.println("예제 실행 중 오류: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             System.out.println("\n=== 파일 정리 ===");
             FilePathManager.cleanupFiles(DELETE_FLAG);
@@ -58,11 +62,11 @@ public class Stage4_CharacterBasedStreams {
     }
     
     /**
-     * 1. Reader/Writer 추상 클래스의 특징
+     * 예제 1: Reader/Writer 추상 클래스의 특징
      * 문자 단위 처리, 유니코드 지원, 바이트 스트림과의 차이점
      */
-    public void demonstrateReaderWriterConcepts() {
-        System.out.println("1. Reader/Writer 추상 클래스의 특징");
+    public void example1_ReaderWriterConcepts() {
+        System.out.println("=== 예제 1: Reader/Writer 추상 클래스의 특징 ===");
         
         try {
             // Writer의 기본 메서드들
@@ -116,11 +120,11 @@ public class Stage4_CharacterBasedStreams {
     }
     
     /**
-     * 2. FileReader/FileWriter - 파일 문자 처리
+     * 예제 2: FileReader/FileWriter - 파일 문자 처리
      * 텍스트 파일 읽기/쓰기의 기본
      */
-    public void demonstrateFileReaderWriter() {
-        System.out.println("2. FileReader/FileWriter - 파일 문자 처리");
+    public void example2_FileReaderWriter() {
+        System.out.println("=== 예제 2: FileReader/FileWriter - 파일 문자 처리 ===");
         
         String textFile = FilePathManager.getFilePath("korean_text.txt");
         
@@ -157,26 +161,26 @@ public class Stage4_CharacterBasedStreams {
     }
     
     /**
-     * 3. StringReader/StringWriter - 메모리 기반 문자 처리
+     * 예제 3: StringReader/StringWriter - 메모리 기반 문자 처리
      * 문자열을 스트림처럼 처리할 때 유용
      */
-    public void demonstrateStringReaderWriter() {
-        System.out.println("3. StringReader/StringWriter - 메모리 기반 문자 처리");
+    public void example3_StringReaderWriter() {
+        System.out.println("=== 예제 3: StringReader/StringWriter - 메모리 기반 문자 처리 ===");
         
         // StringWriter로 메모리에서 문자열 조립
         StringWriter stringWriter = new StringWriter();
 
-		stringWriter.write("StringWriter로 문자열 조립:\n");
-		stringWriter.write("- 첫 번째 라인\n");
-		stringWriter.write("- 두 번째 라인\n");
-		stringWriter.write("- 세 번째 라인\n");
+        stringWriter.write("StringWriter로 문자열 조립:\n");
+        stringWriter.write("- 첫 번째 라인\n");
+        stringWriter.write("- 두 번째 라인\n");
+        stringWriter.write("- 세 번째 라인\n");
 
-		// 현재까지 조립된 문자열 확인
-		String assembledString = stringWriter.toString();
-		System.out.println("조립된 문자열:");
-		System.out.println(assembledString);
+        // 현재까지 조립된 문자열 확인
+        String assembledString = stringWriter.toString();
+        System.out.println("조립된 문자열:");
+        System.out.println(assembledString);
 
-		// StringReader로 문자열을 스트림처럼 읽기
+        // StringReader로 문자열을 스트림처럼 읽기
         String sourceText = "줄1: 첫 번째 줄\n줄2: 두 번째 줄\n줄3: 세 번째 줄";
         StringReader stringReader = new StringReader(sourceText);
         
@@ -195,11 +199,11 @@ public class Stage4_CharacterBasedStreams {
     }
     
     /**
-     * 4. 문자 인코딩과 다국어 처리
+     * 예제 4: 문자 인코딩과 다국어 처리
      * 바이트와 문자 간 변환, 다양한 인코딩 지원
      */
-    public void demonstrateCharacterEncoding() {
-        System.out.println("4. 문자 인코딩과 다국어 처리");
+    public void example4_CharacterEncoding() {
+        System.out.println("=== 예제 4: 문자 인코딩과 다국어 처리 ===");
         
         String multilingualText = "한글 English 日本語 中文 🌍";
         
@@ -227,11 +231,11 @@ public class Stage4_CharacterBasedStreams {
     }
     
     /**
-     * 5. 바이트 스트림 vs 문자 스트림 비교
+     * 예제 5: 바이트 스트림 vs 문자 스트림 비교
      * 언제 어떤 스트림을 사용해야 하는지 명확히 구분
      */
-    public void demonstrateByteVsCharacterStreams() {
-        System.out.println("5. 바이트 스트림 vs 문자 스트림 비교");
+    public void example5_ByteVsCharacterStreams() {
+        System.out.println("=== 예제 5: 바이트 스트림 vs 문자 스트림 비교 ===");
         
         String testText = "한글ABC123!@#";
         
@@ -265,11 +269,11 @@ public class Stage4_CharacterBasedStreams {
     }
     
     /**
-     * 6. PipedReader/PipedWriter - 스레드 간 통신
+     * 예제 6: PipedReader/PipedWriter - 스레드 간 통신
      * 프로듀서-컨슈머 패턴의 구현
      */
-    public void demonstratePipedReaderWriter() {
-        System.out.println("6. PipedReader/PipedWriter - 스레드 간 통신");
+    public void example6_PipedReaderWriter() {
+        System.out.println("=== 예제 6: PipedReader/PipedWriter - 스레드 간 통신 ===");
         
         try {
             PipedWriter writer = new PipedWriter();
@@ -332,11 +336,11 @@ public class Stage4_CharacterBasedStreams {
     }
     
     /**
-     * 7. 실무 활용 - 텍스트 파일 처리
+     * 예제 7: 실무 활용 - 텍스트 파일 처리
      * 설정 파일 읽기, CSV 처리 등 실무 패턴
      */
-    public void demonstratePracticalTextProcessing() {
-        System.out.println("7. 실무 활용 - 텍스트 파일 처리");
+    public void example7_PracticalTextProcessing() {
+        System.out.println("=== 예제 7: 실무 활용 - 텍스트 파일 처리 ===");
         
         // 설정 파일 생성 및 읽기
         String configFile = FilePathManager.getFilePath("app.config");
@@ -344,7 +348,7 @@ public class Stage4_CharacterBasedStreams {
         try (FileWriter configWriter = new FileWriter(configFile)) {
             configWriter.write("# 애플리케이션 설정 파일\n");
             configWriter.write("server.port=8080\n");
-            configWriter.write("data!se.url=jdbc:mysql://localhost:3306/mydb\n");
+            configWriter.write("database.url=jdbc:mysql://localhost:3306/mydb\n");
             configWriter.write("logging.level=INFO\n");
             
             System.out.println("설정 파일 생성 완료");

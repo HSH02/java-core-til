@@ -26,7 +26,7 @@
 └─ 보조 스트림 조합 : 다중 기능 적용
 
 ---
-⚡ 4단계: 문자 기반 스트림 
+✅ 4단계: 문자 기반 스트림 
 ├─ Reader/Writer : 문자 스트림의 최상위 클래스
 ├─ FileReader/FileWriter : 파일 문자 입출력
 ├─ StringReader/StringWriter : 문자열 입출력
@@ -35,7 +35,7 @@
 └─ 바이트 스트림과의 차이점 : 문자 단위 처리
 
 ---
-⚡ 5단계: 문자 기반 보조 스트림
+✅ 5단계: 문자 기반 보조 스트림
 ├─ BufferedReader/BufferedWriter : 문자 버퍼링, readLine()
 ├─ InputStreamReader/OutputStreamWriter : 바이트↔문자 변환
 ├─ PrintWriter : 형식화된 문자 출력
@@ -44,7 +44,7 @@
 └─ Scanner 활용 : 편리한 입력 처리
 
 ---
-⚡ 6단계: 표준 입출력과 File 클래스
+✅ 6단계: 표준 입출력과 File 클래스
 ├─ 표준 입출력 : System.in, System.out, System.err
 ├─ 표준 입출력 대상 변경 : setIn(), setOut(), setErr()
 ├─ File 클래스 : 파일/디렉토리 정보, 경로 처리
@@ -106,3 +106,4 @@
 ├─ 임시 파일 관리 : createTempFile(), 자동 정리
 └─ I/O 모니터링 : 성능 측정, 병목 지점 분석
 
+   
