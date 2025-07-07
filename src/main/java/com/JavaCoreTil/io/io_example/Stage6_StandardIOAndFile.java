@@ -185,7 +185,6 @@ public class Stage6_StandardIOAndFile {
 		System.out.println("- 절대 경로: " + testFile.getAbsolutePath());
 		System.out.println("- 정규화된 경로: " + testFile.getCanonicalPath());
 		System.out.println("- 파일 크기: " + testFile.length() + " 바이트");
-		System.out.println("- 마지막 수정 시간: " + new Date);
 		System.out.println("- 파일 여부: " + testFile.isFile());
 		System.out.println("- 디렉토리 여부: " + testFile.isDirectory());
 		System.out.println("- 숨김 파일 여부: " + testFile.isHidden());

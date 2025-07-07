@@ -62,7 +62,7 @@
 └─ 직렬화 보안 이슈 : 역직렬화 공격 방어
 
 ---
-⚡ 8단계: NIO 기초 (New I/O)
+✅ 8단계: NIO 기초 (New I/O)
 ├─ NIO 등장 배경 : 기존 I/O 한계, 성능 문제
 ├─ Buffer 클래스 : ByteBuffer, position/limit/capacity
 ├─ Channel 개념 : 양방향 통신, FileChannel
@@ -79,31 +79,3 @@
 ├─ 파일 변경 감지 : WatchService, 실시간 모니터링
 └─ Symbolic Link 처리 : 링크 파일 다루기
 
----
-⚡ 10단계: 고성능 I/O 기법
-├─ 메모리 맵핑 : MappedByteBuffer, 대용량 파일 처리
-├─ Zero-Copy I/O : transferTo/transferFrom
-├─ 비동기 파일 I/O : AsynchronousFileChannel
-├─ 논블로킹 I/O : Selector, SocketChannel
-├─ 성능 최적화 : 버퍼 크기, 블로킹 vs 논블로킹
-└─ 벤치마킹 : 실무 성능 측정
-
----
-⚡ 11단계: 스트림 API와 파일 I/O (Java 8+)
-├─ Files.lines() : 파일을 스트림으로 처리
-├─ 함수형 파일 처리 : filter, map, collect
-├─ 대용량 파일 스트림 : 메모리 효율적 처리
-├─ 병렬 스트림 I/O : parallelStream(), 성능 향상
-├─ 스트림과 예외 처리 : UncheckedIOException
-└─ 스트림 기반 로그 분석 : 실무 활용 예제
-
----
-⚡ 12단계: 실무 I/O 패턴과 고급 기법
-├─ 파일 압축 : ZipInputStream/OutputStream, GZIP
-├─ 텍스트 처리와 인코딩 : Charset, UTF-8 처리
-├─ 설정 파일 처리 : Properties, JSON, XML
-├─ 로그 파일 분석 : 대용량 로그 효율적 처리
-├─ 임시 파일 관리 : createTempFile(), 자동 정리
-└─ I/O 모니터링 : 성능 측정, 병목 지점 분석
-
-   

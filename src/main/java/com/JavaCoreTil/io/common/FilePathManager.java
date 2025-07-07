@@ -26,7 +26,12 @@ public class FilePathManager {
      */
     public static String getFilePath(String fileName) {
         String fullPath = BASE_PATH + fileName;
-        // 생성된 파일 목록에 추가
+        createdFiles.add(fullPath);
+        return fullPath;
+    }
+
+    public static String getCustomFilePath(String customPath, String fileName) {
+        String fullPath = customPath + fileName;
         createdFiles.add(fullPath);
         return fullPath;
     }
@@ -40,6 +45,21 @@ public class FilePathManager {
             if (!Files.exists(path)) {
                 Files.createDirectories(path);
                 System.out.println("✓ 디렉토리 생성: " + BASE_PATH);
+            }
+        } catch (IOException e) {
+            System.out.println("디렉토리 생성 실패: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 디렉토리가 존재하지 않으면 생성
+     */
+    public static void ensureCustomDirectoryExists(String customPath) {
+        try {
+            Path path = Paths.get(customPath);
+            if (!Files.exists(path)) {
+                Files.createDirectories(path);
+                System.out.println("✓ 디렉토리 생성: " + customPath);
             }
         } catch (IOException e) {
             System.out.println("디렉토리 생성 실패: " + e.getMessage());
